@@ -1,9 +1,7 @@
 import json
-from typing import Union, Dict, List, Optional
+from typing import Tuple, Union, Dict, List, Optional
 import numpy as np
 from collections import OrderedDict
-import os
-import os.path as osp
 
 babel_action_cats_encode = {
     "a pose": 0,
@@ -420,59 +418,147 @@ class BabelData:
         self.frame_ann: Optional[FrameAnn] = frame_ann if frame_ann is not None else {}
         self.split = split
 
-    def clip_actions_at(self, time_point: float, encoded=False) -> List[str]:
-        actions: List[str] = []
-        if isinstance(self.frame_ann, FrameAnn):
-            for label in self.frame_ann.labels:
-                if label.start_t is not None and label.end_t is not None:
-                    if label.start_t <= time_point <= label.end_t:
-                        act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
-                        actions.extend(act_cat)
-        else:
-            actions.extend(self.sequence_actions())
+    def sequence_actions(self, encoded=False) -> List[Tuple[float, float, str]]:
+        """
+        Returns a list of sequence level actions performed in the sequence.
 
-        return actions
+        Parameters:
+            encoded (bool): If True, the actions will be returned as encoded values.
+                            If False, the actions will be returned as their original labels.
 
-    def clip_actions_in_range(self, start_time: float, end_time: float, encoded=False) -> List[str]:
-        actions: List[str] = []
-        if isinstance(self.frame_ann, FrameAnn):
-            for label in self.frame_ann.labels:
-                if label.start_t is not None and label.end_t is not None:
-                    if start_time <= label.start_t <= end_time or start_time <= label.end_t <= end_time:
-                        act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
-                        actions.extend(act_cat)
-        else:
-            actions.extend(self.sequence_actions())
-
-        return actions
-
-    def clip_proc_labels_in_range(self, start_time: float, end_time: float) -> List[str]:
-        proc_labels: List[str] = []
-        if isinstance(self.frame_ann, FrameAnn):
-            for label in self.frame_ann.labels:
-                if label.start_t is not None and label.end_t is not None:
-                    if start_time <= label.start_t <= end_time or start_time <= label.end_t <= end_time:
-                        proc_labels.append(label.proc_label)
-        else:
-            proc_labels.extend(self.sequence_proc_labels())
-
-        return proc_labels
-
-    def sequence_actions(self, encoded=False) -> List[str]:
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples containing the start time (0),
+                                             end time (duration), and action label for each action
+                                             performed in the sequence.
+        """
         actions: List[str] = []
         if isinstance(self.seq_ann, SeqAnn):
             for label in self.seq_ann.labels:
                 act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
                 actions.extend(act_cat)
+        return (0.0, self.dur, actions)
+
+    def clip_actions_in_range(
+        self, start_time: float, end_time: float, encoded=False
+    ) -> List[Tuple[float, float, str]]:
+        """
+        Returns a list of clip/frame level actions within the specified time range.
+        If no frame level actions are available, defaults to sequence level actions.
+
+        Args:
+            start_time (float): The start time of the range.
+            end_time (float): The end time of the range.
+            encoded (bool, optional): Whether to return the actions encoded or not. Defaults to False.
+
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples containing the start time, end time, and action category.
+
+        """
+        actions: List[str] = []
+        if isinstance(self.frame_ann, FrameAnn):
+            for label in self.frame_ann.labels:
+                if label.start_t is not None and label.end_t is not None:
+                    if start_time <= label.start_t <= end_time or start_time <= label.end_t <= end_time:
+                        act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
+                        actions.append((label.start_t, label.end_t, act_cat))
+        else:
+            actions.append(self.sequence_actions())
+
+        actions = sorted(actions, key=lambda x: x[0])
+
         return actions
 
-    def sequence_proc_labels(self, encoded=False) -> List[str]:
+    def clip_actions_at(self, time_point: float, encoded=False) -> List[Tuple[float, float, str]]:
+        """
+        Returns the clip/frame level actions of the clips that take place during the specified time point.
+        If no clip level actions are available, defaults to sequence level actions.
+
+        Args:
+            time_point (float): The time point at which the actions are to be retrieved.
+            encoded (bool, optional): Specifies whether the actions should be returned in encoded format.
+                                      Defaults to False.
+
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples representing the actions of the clips.
+                                             Each tuple contains the start time, end time, and action label.
+        """
+        return self.clip_actions_in_range(time_point, time_point, encoded)
+
+    def clip_actions(self, encoded=False) -> List[Tuple[float, float, str]]:
+        """
+        Returns a list of all clip/frame level actions.
+        If no clip/frame level actions are available, defaults to sequence level actions.
+
+        Args:
+            encoded (bool): If True, the actions will be encoded.
+
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples containing the start time, end time, and action label for each clip action.
+        """
+        return self.clip_actions_in_range(0.0, self.dur + 1, encoded)
+
+    def sequence_proc_labels(self, encoded=False) -> List[Tuple[float, float, str]]:
+        """
+        Return a list of sequence level processed labels.
+
+        Args:
+            encoded (bool): Flag indicating whether the labels should be encoded or not.
+
+        Returns:
+            Tuple[float, float, List[str]]: A tuple containing the start time, duration, and a list of processed labels.
+        """
         proc_labels: List[str] = []
         if isinstance(self.seq_ann, SeqAnn):
             for label in self.seq_ann.labels:
                 if label.proc_label is not None:
-                    proc_labels.extend(label.proc_label)
+                    proc_labels.append(label.proc_label)
+        return (0.0, self.dur, proc_labels)
+
+    def clip_proc_labels_in_range(self, start_time: float, end_time: float) -> List[Tuple[float, float, str]]:
+        """
+        Returns a list of clip/frame level processed labels within the specified time range.
+
+        Args:
+            start_time (float): The start time of the range.
+            end_time (float): The end time of the range.
+
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples containing the start time, end time, and processed label for each label within the specified range.
+        """
+        proc_labels: List[str] = []
+        if isinstance(self.frame_ann, FrameAnn):
+            for label in self.frame_ann.labels:
+                if label.start_t is not None and label.end_t is not None:
+                    if start_time <= label.start_t <= end_time or start_time <= label.end_t <= end_time:
+                        proc_labels.append((label.start_t, label.end_t, label.proc_label))
+        else:
+            proc_labels.append(self.sequence_proc_labels())
+
+        proc_labels = sorted(proc_labels, key=lambda x: x[0])
+
         return proc_labels
+
+    def clip_proc_labels_at(self, time_point: float) -> List[Tuple[float, float, str]]:
+        """
+        Returns the clip/frame level processed labels of the clips that take place during the specified time point.
+
+        Args:
+            time_point (float): The time point at which the processed labels are to be retrieved.
+
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples representing the processed labels of the clips.
+                                           Each tuple contains the start time, end time, and processed label.
+        """
+        return self.clip_proc_labels_in_range(time_point, time_point)
+
+    def clip_proc_labels(self) -> List[Tuple[float, float, str]]:
+        """
+        Returns a list of all clip/frame level processed labels.
+
+        Returns:
+            List[Tuple[float, float, str]]: A list of tuples containing the start time, end time, and processed label for each label.
+        """
+        return self.clip_proc_labels_in_range(0.0, self.dur + 1)
 
     def __repr__(self) -> str:
         return json.dumps(
@@ -488,7 +574,7 @@ class BabelData:
         )
 
     @classmethod
-    def from_dict(cls, data: dict, split: Optional[str] = None):
+    def from_dict(cls, data: dict, split: Optional[str] = None) -> "BabelData":
         babel_sid = data["babel_sid"]
         url = data["url"]
         feat_p = data["feat_p"]
@@ -564,25 +650,25 @@ class BabelDataset:
                 for l in v.frame_ann.labels:
                     self.seg_id_mappings[l.seg_id] = v
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.data)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx) -> BabelData:
         return list(self.data.values())[idx]
 
-    def by_babel_sid(self, babel_sid: int):
+    def by_babel_sid(self, babel_sid: int) -> BabelData:
         try:
             return self.data[babel_sid]
         except KeyError:
             raise KeyError(f"Babel ID {babel_sid} not found in the dataset.")
 
-    def by_seg_id(self, seg_id: str):
+    def by_seg_id(self, seg_id: str) -> BabelData:
         try:
             return self.seg_id_mappings[seg_id]
         except KeyError:
             raise KeyError(f"Segment ID {seg_id} not found in the dataset.")
 
-    def by_feat_p(self, feat_p: str):
+    def by_feat_p(self, feat_p: str) -> BabelData:
         try:
             return self.feat_p_mapping[feat_p]
         except KeyError:
@@ -617,7 +703,7 @@ class BabelDataset:
             raise ValueError("Unsupported type for act_cat")
 
     @classmethod
-    def from_dict(cls, babel_dict: dict, split: Optional[str] = None):
+    def from_dict(cls, babel_dict: dict, split: Optional[str] = None) -> "BabelDataset":
         dataset = [BabelData.from_dict(d, split) for d in babel_dict.values()]
 
         dataset = BabelDataset(dataset)
@@ -625,7 +711,7 @@ class BabelDataset:
         return dataset
 
     @classmethod
-    def from_json_file(cls, file_path, split=None):
+    def from_json_file(cls, file_path, split=None) -> "BabelDataset":
         # Load the JSON data from a file or a string
         with open(file_path, "r") as f:
             data = json.load(f)
@@ -633,7 +719,7 @@ class BabelDataset:
         return BabelDataset.from_dict(data, split=split)
 
     @classmethod
-    def from_datasets(cls, datasets):
+    def from_datasets(cls, datasets) -> "BabelDataset":
         """
         Create a BabelDataset from a list of datasets. If there are duplicate BABEL sequence IDs, the first dataset in the list will take precedence.
         This means if the datasets are ordered by [train,val,test,extra_train,extra_val], data from extra_train and extra_val will only be used
@@ -656,6 +742,9 @@ class BabelDataset:
 
 
 if __name__ == "__main__":
+    print("Testing BabelDataset class")
+    print("Make sure to have the BABEL dataset downloaded and extracted in the correct path.")
+
     babel_train_path = "./babel_dataset/babel_v1-0_release/train.json"
     babel_val_path = "./babel_dataset/babel_v1-0_release/val.json"
     babel_test_path = "./babel_dataset/babel_v1-0_release/test.json"
@@ -674,4 +763,6 @@ if __name__ == "__main__":
         [train_dataset, test_dataset, val_dataset, extra_train_dataset, extra_val_dataset]
     )
 
-    print(common_dataset)
+    for d in common_dataset[:50]:
+        d: BabelData
+        print(d.sequence_actions())
