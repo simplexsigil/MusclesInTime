@@ -439,7 +439,7 @@ class BabelData:
         return (0.0, self.dur, actions)
 
     def clip_actions_in_range(
-        self, start_time: float, end_time: float, encoded=False
+        self, start_time: float, end_time: float, encoded=False, coverage_threshold=0.5
     ) -> List[Tuple[float, float, str]]:
         """
         Returns a list of clip/frame level actions within the specified time range.
@@ -458,7 +458,9 @@ class BabelData:
         if isinstance(self.frame_ann, FrameAnn):
             for label in self.frame_ann.labels:
                 if label.start_t is not None and label.end_t is not None:
-                    if start_time <= label.start_t <= end_time or start_time <= label.end_t <= end_time:
+                    # overlap between the label and the time range
+                    overlap = min(end_time, label.end_t) - max(start_time, label.start_t)
+                    if overlap / (label.end_t - label.start_t) >= coverage_threshold:
                         act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
                         actions.append((label.start_t, label.end_t, act_cat))
         else:
@@ -739,6 +741,8 @@ class BabelDataset:
                     data[v.babel_sid] = v
 
         return BabelDataset(data)
+
+    
 
 
 if __name__ == "__main__":
