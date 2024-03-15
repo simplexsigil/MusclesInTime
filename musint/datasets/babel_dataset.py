@@ -656,23 +656,35 @@ class BabelDataset:
     def __getitem__(self, idx) -> BabelData:
         return list(self.data.values())[idx]
 
-    def by_babel_sid(self, babel_sid: int) -> BabelData:
+    def by_babel_sid(self, babel_sid: int, raise_missing=True, default=None) -> BabelData:
         try:
             return self.data[babel_sid]
         except KeyError:
-            raise KeyError(f"Babel ID {babel_sid} not found in the dataset.")
+            if raise_missing:
+                raise KeyError(f"Babel ID {babel_sid} not found in the dataset.")
+            else:
+                return default
 
-    def by_seg_id(self, seg_id: str) -> BabelData:
+    def by_seg_id(self, seg_id: str, raise_missing=True, default=None) -> BabelData:
         try:
             return self.seg_id_mappings[seg_id]
         except KeyError:
-            raise KeyError(f"Segment ID {seg_id} not found in the dataset.")
+            if raise_missing:
+                raise KeyError(f"Segment ID {seg_id} not found in the dataset.")
+            else:
+                return default
 
-    def by_feat_p(self, feat_p: str) -> BabelData:
+    def by_feat_p(self, feat_p: str, raise_missing=True, default=None) -> BabelData:
+        if feat_p[-4:] != ".npz":
+            feat_p = feat_p + ".npz"
+
         try:
             return self.feat_p_mapping[feat_p]
         except KeyError:
-            raise KeyError(f"Feature path {feat_p} not found in the dataset.")
+            if raise_missing:
+                raise KeyError(f"Feature path {feat_p} not found in the dataset.")
+            else:
+                return default
 
     @classmethod
     def act_cat_enc(cls, act_cat: Union[str, List[str], np.ndarray]) -> Union[int, List[int]]:
