@@ -6,23 +6,38 @@ from torch.utils import data
 from musint.utils.dataframe_utils import trim_mint_dataframe
 from musint.utils.metadata_utils import concatenate_mint_metadata, load_pkl_file
 
+import os.path as osp
+
 
 class MintData:
     """
     A class to represent the muscle activations, grf and forces of a sample from the MINT dataset
     """
 
-    def __init__(
-        self, muscle_activations: pd.DataFrame, grf: pd.DataFrame, forces: pd.DataFrame
-    ):
-        self.muscle_activations = muscle_activations
-        self.grf = grf
-        self.forces = forces
+    def __init__(self, sample: pd.Series, dataset_path: str):
+        self.dataset_path = dataset_path
+        self.data_path = sample["data_path"]
+        self.full_data_path = f"{dataset_path}/{self.data_path}"
+        self.weight = sample["weight_kg"]
+        self.height = sample["height_cm"]
+        self.amass_dur = sample["amass_dur"]
+        self.babel_sid = sample["babel_sid"]
+        self.subject = sample["subject"]
+        self.sequence = sample["sequence"]
+        self.dataset = sample["dataset"]
+        self.gender = sample["gender"]
+        self.analysed_dur = sample["analysed_dur"]
+        self.analysed_percentage = sample["analysed_%"]
+        self.gap = sample["gap"]
+        # reomve the _poses from the path_id
+        self.path_id = osp.join(sample["subject"], sample["sequence"]).replace("_poses", "")
+        self.muscle_activations = load_pkl_file(self.dataset_path, self.data_path, "muscle_activations")
+        self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
+        self.forces = load_pkl_file(self.dataset_path, self.data_path, "forces")
         self.end_time = self.muscle_activations.index[-1]
         self.start_time = self.muscle_activations.index[0]
-        self.duration = self.end_time - self.start_time
         self.num_frames = self.muscle_activations.shape[0]
-        self.fps = round(self.num_frames / self.duration, 0)
+        self.fps = 50.0 # all the samples in the dataset have a fixed fps of 50.0
 
     def get_muscle_activations(
         self,
@@ -138,14 +153,7 @@ class MintDataset(data.Dataset):
     def __getitem__(self, idx: int) -> MintData:
         """Get a sample by its index"""
         sample = self.metadata.iloc[idx]
-
-        muscle_activations = load_pkl_file(
-            self.dataset_path, sample["data_path"], "muscle_activations"
-        )
-        grf = load_pkl_file(self.dataset_path, sample["data_path"], "grf")
-        forces = load_pkl_file(self.dataset_path, sample["data_path"], "forces")
-
-        return MintData(muscle_activations, grf, forces)
+        return MintData(sample, self.dataset_path)
 
     def by_path_id(self, path_id: str):
         """
@@ -223,7 +231,7 @@ if __name__ == "__main__":
     sample_by_path_id = mint_dataset.by_path_id("s1/acting2")
     print(sample_by_path_id.fps)
     sample_by_path = mint_dataset.by_path("TotalCapture/TotalCapture/s1/acting2_poses")
-    print(sample_by_path.get_forces(None))
+    print(sample_by_path.path_id)
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
     print(sample_by_babel_sid.get_forces(None))
     sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence(
