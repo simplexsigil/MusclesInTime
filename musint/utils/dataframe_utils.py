@@ -3,7 +3,7 @@ from typing import Tuple
 
 EPOCH = pd.Timestamp("1970-01-01")
 
-def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], target_fps=20.0, rolling_average=False):
+def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], target_fps=20.0, rolling_average=False, target_frame_count=64, as_numpy=True):
     '''
     Resample muscle activations to the given time window and fps. Returns the values as a numpy array
 
@@ -14,25 +14,32 @@ def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], targ
     rolling_average (bool): Whether to apply a rolling average
 
     Returns:
-    np.ndarray: The resampled values as a numpy array
+    np.ndarray: The resampled values as a numpy array or a dataframe
     '''
     # ms of resampling depending on the fps
     resampling_ms = 1000 / target_fps
 
     # trim the dataframe to the time window
-    filered_df = df[df.index.to_series().between(time_window[0], time_window[1])]
+    filtered_df = df[df.index.to_series().between(time_window[0], time_window[1], inclusive='both')]
 
     # convert to datetime
-    filered_df.index = pd.to_datetime(filered_df.index, unit='s')
+    filtered_df.index = pd.to_datetime(filtered_df.index, unit='s')
 
     if rolling_average:
         # rolling average with 50ms window
-        filered_df = filered_df.rolling(f'{resampling_ms}ms').mean()
+        filtered_df = filtered_df.rolling(f'{resampling_ms}ms').mean()
 
     # resample to 50ms
-    filered_df = filered_df.resample(f'{resampling_ms}ms').nearest()
+    filtered_df = filtered_df.resample(f'{resampling_ms}ms').nearest()
 
     # convert back to timestamp
-    filered_df.index = (filered_df.index - EPOCH) / pd.Timedelta('1s')
+    filtered_df.index = (filtered_df.index - EPOCH) / pd.Timedelta('1s')
 
-    return filered_df.values
+    if target_frame_count is not None:
+        # trim to target_frame_count
+        filtered_df = filtered_df.head(target_frame_count)
+
+    if as_numpy:
+        return filtered_df.values
+    else:
+        return filtered_df

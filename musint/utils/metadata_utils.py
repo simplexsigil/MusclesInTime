@@ -35,7 +35,7 @@ def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old
         # Concatenate all dataframes in the list into a single dataframe
         df_concat = pd.concat(df_list, ignore_index=True)
 
-        df_concat = convert_types_mint_metadata(df_concat, fillna)
+        df_concat = convert_types_mint_metadata(df_concat)
 
         df_concat = append_path_id_to_mint_metadata(df_concat)
 
@@ -45,14 +45,24 @@ def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old
     else:
         df_concat = pd.read_csv(output_file)
 
-        df_concat = convert_types_mint_metadata(df_concat, fillna)
+        df_concat = convert_types_mint_metadata(df_concat)
 
     df_concat.set_index("path_id", inplace=True)
 
     return df_concat
 
 
-def convert_types_mint_metadata(df: pd.DataFrame, fillna: bool = True):
+def load_all_pkl_files(dataset_path: str, metadata: pd.DataFrame, file_type: str = "muscle_activations"):
+    """
+    Loads all the pkl files for the given file_type and returns a dictionary of dataframes.
+    """
+    pkl_files = {}
+    for path_id in metadata.index:
+        pkl_files[path_id] = load_pkl_file(dataset_path, metadata.loc[path_id, "data_path"], file_type)
+    return pkl_files
+
+
+def convert_types_mint_metadata(df: pd.DataFrame):
     """
     Converts the columns of the dataframe to the correct data types.
 
@@ -87,6 +97,20 @@ def get_pkl_file_path(dataset_path: str, data_path: str, file_type: str = "muscl
     Parameters:
     dataset_path (str): The path to the mint dataset
     path_id (str): The path_id of the file
-    filename (str): The name of the pkl file
+    file_type (str): muscle_activations, grf, or forces
     """
+    if file_type not in filenames.keys():
+        raise ValueError(f"file_type must be one of {filenames.keys()}")
     return osp.join(dataset_path, data_path, filenames[file_type])
+
+def load_pkl_file(dataset_path: str, data_path: str, file_type: str = "muscle_activations"):
+    """
+    Returns the dataframe of the pkl file for the given data_path and filename.
+
+    Parameters:
+    dataset_path (str): The path to the mint dataset
+    path_id (str): The path_id of the file
+    file_type (str): muscle_activations, grf, or forces
+    """
+    file_path = get_pkl_file_path(dataset_path, data_path, file_type)
+    return pd.read_pickle(file_path)
