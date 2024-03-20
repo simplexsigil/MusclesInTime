@@ -3,7 +3,7 @@ from typing import Tuple
 
 EPOCH = pd.Timestamp("1970-01-01")
 
-def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], target_fps=20.0, rolling_average=False, target_frame_count=64):
+def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], target_fps=20.0, rolling_average=False, target_frame_count=64, as_numpy=True):
     '''
     Resample muscle activations to the given time window and fps. Returns the values as a numpy array
 
@@ -14,7 +14,7 @@ def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], targ
     rolling_average (bool): Whether to apply a rolling average
 
     Returns:
-    np.ndarray: The resampled values as a numpy array
+    np.ndarray: The resampled values as a numpy array or a dataframe
     '''
     # ms of resampling depending on the fps
     resampling_ms = 1000 / target_fps
@@ -35,4 +35,11 @@ def trim_mint_dataframe(df: pd.DataFrame, time_window: Tuple[float, float], targ
     # convert back to timestamp
     filtered_df.index = (filtered_df.index - EPOCH) / pd.Timedelta('1s')
 
-    return filtered_df.values[:target_frame_count, :]
+    if target_frame_count is not None:
+        # trim to target_frame_count
+        filtered_df = filtered_df.head(target_frame_count)
+
+    if as_numpy:
+        return filtered_df.values
+    else:
+        return filtered_df
