@@ -7,6 +7,7 @@ from musint.utils.dataframe_utils import trim_mint_dataframe
 from musint.utils.metadata_utils import concatenate_mint_metadata, load_pkl_file
 
 import os.path as osp
+import os
 
 
 class MintData:
@@ -29,7 +30,6 @@ class MintData:
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
         self.gap = sample["gap"]
-        # reomve the _poses from the path_id
         self.path_id = osp.join(sample["subject"], sample["sequence"]).replace("_poses", "")
         self.muscle_activations = load_pkl_file(self.dataset_path, self.data_path, "muscle_activations")
         self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
@@ -163,7 +163,7 @@ class MintDataset(data.Dataset):
         path_id (int): The path_id of the sample
 
         Returns:
-        dict: The sample
+        MintData: The sample
         """
         if path_id not in self.metadata.index:
             raise ValueError(f"No sample found with path_id: {path_id}")
@@ -177,7 +177,7 @@ class MintDataset(data.Dataset):
         path (str): The path of the sample
 
         Returns:
-        dict: The sample
+        MintData: The sample
         """
         filtered = self.metadata[self.metadata["data_path"] == path]
         if filtered.empty:
@@ -193,7 +193,7 @@ class MintDataset(data.Dataset):
         babel_sid (int): The babel_sid of the sample
 
         Returns:
-        dict: The sample
+        MintData: The sample
         """
         filtered = self.metadata[self.metadata["babel_sid"] == babel_sid]
         if filtered.empty:
@@ -210,7 +210,7 @@ class MintDataset(data.Dataset):
         sequence (str): The sequence of the sample
 
         Returns:
-        dict: The sample
+        MintData: The sample
         """
         filtered = self.metadata[self.metadata["subject"] == subject]
         filtered = filtered[filtered["sequence"] == sequence]
@@ -220,6 +220,34 @@ class MintDataset(data.Dataset):
             )
         idx = self.metadata.index.get_loc(filtered.index[0])
         return self[idx]
+
+    def by_humanml3d_name(self, humanml3d_name: str):
+        """
+        Get a sample by its humanml3d_name
+
+        Parameters:
+        humanml3d_name (str): The humanml3d_name of the sample
+
+        Returns:
+        MintData: The sample
+        """
+        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), 'humanml3d_index.csv')
+        df = pd.read_csv(csv_path)
+
+        if not humanml3d_name.endswith(".npy"):
+            humanml3d_name = humanml3d_name + ".npy"
+        
+        if humanml3d_name not in df['new_name'].values:
+            raise ValueError(f"No sample found with humanml3d_name: {humanml3d_name}")
+        
+        row = df[df['new_name'] == humanml3d_name]
+        source_path = row['source_path'].values[0]
+
+        subject = source_path.split('/')[3]
+        sequence = source_path.split('/')[4].replace('.npy', '')
+        
+        return self.by_subject_and_sequence(subject, sequence)
+
 
 
 if __name__ == "__main__":
@@ -237,3 +265,8 @@ if __name__ == "__main__":
     sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence(
         "s1", "acting2_poses"
     )
+    print(sample_by_subject_and_sequence.get_forces(None))
+    sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("000087")
+    print(sample_by_humanml3d_name.get_forces(None))
+    sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("000087.npy")
+    print(sample_by_humanml3d_name.get_forces(None))
