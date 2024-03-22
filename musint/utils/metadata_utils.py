@@ -8,6 +8,7 @@ filenames = {
     "forces": "muscle_forces.pkl",
 }
 
+
 def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old: bool = False):
     """
     Returns a concatenated dataframe of all the CSV files in the dataset_path.
@@ -24,6 +25,8 @@ def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old
         # Walk through all directories and files in the dataset_path
         for root, dirs, files in os.walk(dataset_path):
             for file in files:
+                if file.endswith("muscle_activations.csv"):
+                    continue
                 if file.endswith(".csv"):
                     # Construct the full file path
                     file_path = os.path.join(root, file)
@@ -102,6 +105,7 @@ def get_pkl_file_path(dataset_path: str, data_path: str, file_type: str = "muscl
     if file_type not in filenames.keys():
         raise ValueError(f"file_type must be one of {filenames.keys()}")
     return osp.join(dataset_path, data_path, filenames[file_type])
+
 
 def load_pkl_file(dataset_path: str, data_path: str, file_type: str = "muscle_activations"):
     """
