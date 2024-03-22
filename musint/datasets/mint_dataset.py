@@ -39,9 +39,7 @@ class MintData:
         self.end_time = self.muscle_activations.index[-1]
         self.start_time = self.muscle_activations.index[0]
         self.num_frames = self.muscle_activations.shape[0]
-        self.fps = 50.0 # all the samples in the dataset have a fixed fps of 50.0
-
-
+        self.fps = 50.0  # all the samples in the dataset have a fixed fps of 50.0
 
     def get_muscle_activations(
         self,
@@ -135,7 +133,6 @@ class MintData:
             target_frame_count,
             as_numpy,
         )
-    
 
     def get_valid_indices(self, frame_window: Tuple[int, int], fps=20.0):
         """
@@ -168,12 +165,12 @@ class MintData:
             pos = self.muscle_activations.index.get_loc(gap_index)
             if pos > 0:  # Skip if it's the first index
                 if as_frame:
-                    gap_tuples.append((pos-1, pos))
+                    gap_tuples.append((pos - 1, pos))
                 else:
-                    gap_tuples.append((self.muscle_activations.index[pos-1], self.muscle_activations.index[pos]))
+                    gap_tuples.append((self.muscle_activations.index[pos - 1], self.muscle_activations.index[pos]))
 
         return gap_tuples
-    
+
 
 class MintDataset(data.Dataset):
     """
@@ -184,9 +181,9 @@ class MintDataset(data.Dataset):
     transform (Optional[Callable]): A transform to apply to the data
     """
 
-    def __init__(self, dataset_path: str):
+    def __init__(self, dataset_path: str, use_cache: bool = True):
         self.dataset_path = dataset_path
-        self.metadata = concatenate_mint_metadata(dataset_path)
+        self.metadata = concatenate_mint_metadata(dataset_path, delete_old=not use_cache)
 
     def __len__(self):
         # return the number of samples of the dataframe (metadata)
@@ -257,9 +254,7 @@ class MintDataset(data.Dataset):
         filtered = self.metadata[self.metadata["subject"] == subject]
         filtered = filtered[filtered["sequence"] == sequence]
         if filtered.empty:
-            raise ValueError(
-                f"No sample found with subject: {subject} and sequence: {sequence}"
-            )
+            raise ValueError(f"No sample found with subject: {subject} and sequence: {sequence}")
         idx = self.metadata.index.get_loc(filtered.index[0])
         return self[idx]
 
@@ -274,27 +269,30 @@ class MintDataset(data.Dataset):
         MintData: The sample
         (Tuple[float, float]): The start and end times of the sample if as_time is True else the start and end frames of the HumanML3D sample
         """
-        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), 'humanml3d_index.csv')
+        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv")
         df = pd.read_csv(csv_path)
 
         if not humanml3d_name.endswith(".npy"):
             humanml3d_name = humanml3d_name + ".npy"
-        
+
         if humanml3d_name.startswith("M"):
             humanml3d_name = humanml3d_name[1:]
-        
-        if humanml3d_name not in df['new_name'].values:
+
+        if humanml3d_name not in df["new_name"].values:
             raise ValueError(f"No sample found with humanml3d_name: {humanml3d_name}")
-        
-        row = df[df['new_name'] == humanml3d_name]
-        source_path = row['source_path'].values[0]
 
-        subject = source_path.split('/')[3]
-        sequence = source_path.split('/')[4].replace('.npy', '')
+        row = df[df["new_name"] == humanml3d_name]
+        source_path = row["source_path"].values[0]
 
-        frames = (row['start_frame'].values[0], row['end_frame'].values[0])
+        subject = source_path.split("/")[3]
+        sequence = source_path.split("/")[4].replace(".npy", "")
 
-        frame_times = (frame_to_time(frames[0], 20.0), frame_to_time(frames[1], 20.0)) # 20.0 is the fps for the humanml3d dataset
+        frames = (row["start_frame"].values[0], row["end_frame"].values[0])
+
+        frame_times = (
+            frame_to_time(frames[0], 20.0),
+            frame_to_time(frames[1], 20.0),
+        )  # 20.0 is the fps for the humanml3d dataset
 
         if as_time:
             return self.by_subject_and_sequence(subject, sequence), frame_times
@@ -302,11 +300,10 @@ class MintDataset(data.Dataset):
             return self.by_subject_and_sequence(subject, sequence), frames
 
 
-
 if __name__ == "__main__":
-    """ Example usage of the MintDataset class """
+    """Example usage of the MintDataset class"""
     dataset_path = "/lsdf/data/activity/MuscleSim/musclesim_dataset"
-    mint_dataset = MintDataset(dataset_path)
+    mint_dataset = MintDataset(dataset_path, use_cache=False)
     sample = mint_dataset[0]
     print(sample.get_forces(None))
     sample_by_path_id = mint_dataset.by_path_id("s1/acting2")
@@ -315,9 +312,7 @@ if __name__ == "__main__":
     print(sample_by_path.path_id)
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
     print(sample_by_babel_sid.get_forces(None))
-    sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence(
-        "s1", "acting2_poses"
-    )
+    sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence("s1", "acting2_poses")
     print(sample_by_subject_and_sequence.get_forces(None))
     sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")
     print(sample_by_humanml3d_name[0].get_forces(None))
@@ -326,7 +321,7 @@ if __name__ == "__main__":
     sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260.npy")
     print(sample_by_humanml3d_name[0].get_forces(None))
     print("Index values:")
-    pd.set_option('display.max_rows', None)
+    pd.set_option("display.max_rows", None)
 
     print(sample_by_humanml3d_name[0].get_forces(None, target_fps=50).index.values)
     print(sample_by_humanml3d_name[0].get_valid_indices((10, 1000), 20.0))
