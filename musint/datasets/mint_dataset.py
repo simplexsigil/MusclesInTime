@@ -45,7 +45,7 @@ class MintData:
 
     def get_muscle_activations(
         self,
-        time_window: Tuple[float, float],
+        time_window: Tuple[float, float] = None,
         target_fps=20.0,
         rolling_average=False,
         target_frame_count=None,
@@ -60,7 +60,7 @@ class MintData:
         rolling_average (bool): Whether to apply a rolling average
 
         Returns:
-        np.ndarray: The resampled values as a numpy array
+        np.ndarray/pd.DataFrame: The resampled values as a numpy array or a dataframe
         """
         if time_window is None:
             time_window = (self.start_time, self.end_time)
@@ -76,7 +76,7 @@ class MintData:
 
     def get_grf(
         self,
-        time_window: Tuple[float, float],
+        time_window: Tuple[float, float] = None,
         target_fps=20.0,
         rolling_average=False,
         target_frame_count=None,
@@ -91,7 +91,7 @@ class MintData:
         rolling_average (bool): Whether to apply a rolling average
 
         Returns:
-        np.ndarray: The resampled values as a numpy array
+        np.ndarray/pd.DataFrame: The resampled values as a numpy array or a dataframe
         """
         if time_window is None:
             time_window = (self.start_time, self.end_time)
@@ -107,7 +107,7 @@ class MintData:
 
     def get_forces(
         self,
-        time_window: Tuple[float, float],
+        time_window: Tuple[float, float] = None,
         target_fps=20.0,
         rolling_average=False,
         target_frame_count=None,
@@ -122,7 +122,7 @@ class MintData:
         rolling_average (bool): Whether to apply a rolling average
 
         Returns:
-        np.ndarray: The resampled values as a numpy array
+        np.ndarray/pd.DataFrame: The resampled values as a numpy array or a dataframe
         """
         if time_window is None:
             time_window = (self.start_time, self.end_time)
@@ -272,6 +272,7 @@ class MintDataset(data.Dataset):
 
         Returns:
         MintData: The sample
+        (Tuple[float, float]): The start and end times of the sample if as_time is True else the start and end frames of the HumanML3D sample
         """
         csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), 'humanml3d_index.csv')
         df = pd.read_csv(csv_path)
