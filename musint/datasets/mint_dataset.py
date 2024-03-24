@@ -1,13 +1,18 @@
+import ast
+import os
+import os.path as osp
 from typing import Tuple
 
+import numpy as np
 import pandas as pd
 from torch.utils import data
 
-from musint.utils.dataframe_utils import trim_mint_dataframe, frame_to_time
+from musint.utils.dataframe_utils import (
+    frame_to_time,
+    time_to_frame,
+    trim_mint_dataframe,
+)
 from musint.utils.metadata_utils import concatenate_mint_metadata, load_pkl_file
-
-import os.path as osp
-import os
 
 
 class MintData:
@@ -29,17 +34,24 @@ class MintData:
         self.gender = sample["gender"]
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
-        self.has_gap = sample["gap"]
-        self.path_id = osp.join(sample["subject"], sample["sequence"]).replace("_poses", "")
+        self.has_gap = ast.literal_eval(sample["gap"])
+        self.path_id = osp.join(sample["subject"], sample["sequence"]).replace(
+            "_poses", ""
+        )
 
-        self.muscle_activations = load_pkl_file(self.dataset_path, self.data_path, "muscle_activations")
+        self.muscle_activations = load_pkl_file(
+            self.dataset_path, self.data_path, "muscle_activations"
+        )
         self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
         self.forces = load_pkl_file(self.dataset_path, self.data_path, "forces")
 
-        self.end_time = self.muscle_activations.index[-1]
         self.start_time = self.muscle_activations.index[0]
+        self.end_time = self.muscle_activations.index[-1]
         self.num_frames = self.muscle_activations.shape[0]
         self.fps = 50.0  # all the samples in the dataset have a fixed fps of 50.0
+
+        self.humanml3d_source_path = self.get_humanml3d_source_path()
+        self.humanml3d_name = self.get_humanml3d_names()
 
     def get_muscle_activations(
         self,
@@ -134,42 +146,97 @@ class MintData:
             as_numpy,
         )
 
-    def get_valid_indices(self, frame_window: Tuple[int, int], fps=20.0):
+    def get_valid_indices(
+        self, time_window: Tuple[float, float] = None, target_fps=20.0, as_time=True
+    ):
         """
-        Get the valid indices of the muscle activations given the frame indices and their corresponding fps
+        Gets the valid indices of the muscle activations given the frame indices.
+        Returns the indices as frames or time corresponding to the target fps.
 
         Returns:
-        np.ndarray: The valid indices
+        np.ndarray: The valid indices as frames or time
         """
-        time_window = (frame_to_time(frame_window[0], fps), frame_to_time(frame_window[1], fps))
-        trimmed_muscle_activations = self.get_muscle_activations(time_window, fps, as_numpy=False)
+        if time_window is None:
+            time_window = (self.start_time, self.end_time)
 
-        # Get the indices that are within the frame_window range
-        valid_indices = trimmed_muscle_activations.index
+        trimmed_muscle_activation_index = self.muscle_activations.index[
+            self.muscle_activations.index.to_series().between(
+                time_window[0], time_window[1]
+            )
+        ]
 
-        return valid_indices
+        frame_indices = (
+            np.round(trimmed_muscle_activation_index * target_fps, 0)
+            .astype(int)
+            .unique()
+        )
 
-    def get_gaps(self, as_frame=False, fps=50.0):
+        if as_time:
+            frame_times = frame_indices / target_fps
+            return np.round(frame_times, 2)
+        else:
+            return frame_indices
+
+    def get_gaps(self, as_frame=False, target_fps=20.0):
         """
         Gets all the pairs of indices before and after a gap in the muscle activations
         """
-        differences = self.get_muscle_activations(None, fps, as_numpy=False).index.to_series().diff()
+        # resample index of the muscle activations to fps
+        muscle_activation_index = self.muscle_activations.index
+        muscle_activation_index = np.round(muscle_activation_index * self.fps).astype(
+            int
+        )
 
-        normal_difference = round(1 / fps, 2) + 0.01
+        differences = pd.Series(muscle_activation_index).diff()
+
+        normal_difference = 1.01
         # Get the indices of the differences that are larger than 0.02s
-        gap_indices = differences[differences > normal_difference].index
+        gap_indices = muscle_activation_index[differences > normal_difference]
 
-        # Create a list of tuples, where each tuple contains the index before and after the gap
         gap_tuples = []
         for gap_index in gap_indices:
-            pos = self.muscle_activations.index.get_loc(gap_index)
-            if pos > 0:  # Skip if it's the first index
-                if as_frame:
-                    gap_tuples.append((pos - 1, pos))
-                else:
-                    gap_tuples.append((self.muscle_activations.index[pos - 1], self.muscle_activations.index[pos]))
+            pos2 = gap_index
+            time = frame_to_time(gap_index, self.fps)
+            previous_frame = (
+                self.muscle_activations.index.get_loc(frame_to_time(pos2, self.fps)) - 1
+            )
+            previous_time = self.muscle_activations.index[previous_frame]
+            if as_frame:
+                gap_tuples.append(
+                    (
+                        time_to_frame(previous_time, target_fps),
+                        time_to_frame(time, target_fps),
+                    )
+                )
+            else:
+                gap_tuples.append((previous_time, time))
 
         return gap_tuples
+
+    def get_humanml3d_source_path(self):
+        """
+        Get the source path of the HumanML3D sample
+        """
+        source_path = osp.join(
+            "./pose_data", self.dataset, self.subject, self.sequence + ".npy"
+        )
+
+        return source_path
+
+    def get_humanml3d_names(self):
+        """
+        Get the humanml3d names of the sample
+        """
+        csv_path = osp.join(
+            os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv"
+        )
+        df = pd.read_csv(csv_path)
+
+        humanml3d_names = df[df["source_path"] == self.humanml3d_source_path][
+            "new_name"
+        ].values
+
+        return humanml3d_names
 
 
 class MintDataset(data.Dataset):
@@ -183,7 +250,9 @@ class MintDataset(data.Dataset):
 
     def __init__(self, dataset_path: str, use_cache: bool = True):
         self.dataset_path = dataset_path
-        self.metadata = concatenate_mint_metadata(dataset_path, delete_old=not use_cache)
+        self.metadata = concatenate_mint_metadata(
+            dataset_path, delete_old=not use_cache
+        )
 
     def __len__(self):
         # return the number of samples of the dataframe (metadata)
@@ -254,7 +323,9 @@ class MintDataset(data.Dataset):
         filtered = self.metadata[self.metadata["subject"] == subject]
         filtered = filtered[filtered["sequence"] == sequence]
         if filtered.empty:
-            raise ValueError(f"No sample found with subject: {subject} and sequence: {sequence}")
+            raise ValueError(
+                f"No sample found with subject: {subject} and sequence: {sequence}"
+            )
         idx = self.metadata.index.get_loc(filtered.index[0])
         return self[idx]
 
@@ -269,7 +340,9 @@ class MintDataset(data.Dataset):
         MintData: The sample
         (Tuple[float, float]): The start and end times of the sample if as_time is True else the start and end frames of the HumanML3D sample
         """
-        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv")
+        csv_path = osp.join(
+            os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv"
+        )
         df = pd.read_csv(csv_path)
 
         if not humanml3d_name.endswith(".npy"):
@@ -312,7 +385,9 @@ if __name__ == "__main__":
     print(sample_by_path.path_id)
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
     print(sample_by_babel_sid.get_forces(None))
-    sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence("s1", "acting2_poses")
+    sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence(
+        "s1", "acting2_poses"
+    )
     print(sample_by_subject_and_sequence.get_forces(None))
     sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")
     print(sample_by_humanml3d_name[0].get_forces(None))

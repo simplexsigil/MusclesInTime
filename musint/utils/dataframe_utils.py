@@ -1,5 +1,6 @@
-import pandas as pd
 from typing import Tuple
+
+import pandas as pd
 
 EPOCH = pd.Timestamp("1970-01-01")
 
@@ -11,7 +12,6 @@ def trim_mint_dataframe(
     rolling_average=False,
     target_frame_count=64,
     as_numpy=True,
-    check_gaps=False,
 ):
     """
     Resample muscle activations to the given time window and fps. Returns the values as a numpy array
@@ -29,15 +29,16 @@ def trim_mint_dataframe(
     resampling_ms = 1000 / target_fps
 
     # trim the dataframe to the time window
-    filtered_df = df[df.index.to_series().between(time_window[0], time_window[1], inclusive="both")]
+    filtered_df = df[
+        df.index.to_series().between(time_window[0], time_window[1], inclusive="both")
+    ]
 
     # check for a gap in the indices which resemble float timestamps
-    if check_gaps:
-        differences = filtered_df.index.to_series().diff()
-        if any(
-            differences > (1 / 50) + 1e-2
-        ):  # This is the expected gap given that the MinT dataset is sampled at 50Hz.
-            raise ValueError("Found a gap in the timestamps larger than 0.02s")
+    differences = filtered_df.index.to_series().diff()
+    if any(
+        differences > (1 / 50) + 1e-2
+    ):  # This is the expected gap given that the MinT dataset is sampled at 50Hz.
+        raise ValueError("Found a gap in the timestamps larger than 0.02s")
 
     # convert to datetime
     filtered_df.index = pd.to_datetime(filtered_df.index, unit="s")
@@ -66,11 +67,11 @@ def frame_to_time(frame: int, fps: float):
     """
     Converts a frame number to a time in seconds
     """
-    return frame / fps
+    return round(frame / fps, 2)
 
 
 def time_to_frame(time: float, fps: float):
     """
     Converts a time in seconds to a frame number
     """
-    return time * fps
+    return int(time * fps)

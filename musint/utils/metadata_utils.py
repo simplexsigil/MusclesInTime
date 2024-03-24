@@ -1,6 +1,7 @@
-import pandas as pd
 import os
 import os.path as osp
+
+import pandas as pd
 
 filenames = {
     "muscle_activations": "muscle_activations.pkl",
@@ -9,7 +10,9 @@ filenames = {
 }
 
 
-def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old: bool = False):
+def concatenate_mint_metadata(
+    dataset_path: str, fillna: bool = True, delete_old: bool = False
+):
     """
     Returns a concatenated dataframe of all the CSV files in the dataset_path.
     If the concatenated dataframe has already been created, it will be read from the output CSV file.
@@ -17,7 +20,7 @@ def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old
     Parameters:
     dataset_path (str): The path to the mint dataset
     """
-    output_file = osp.join(dataset_path, "muscle_activations.csv")
+    output_file = osp.join(dataset_path, "mint_metadata.csv")
 
     if not osp.exists(output_file) or delete_old:
         df_list = []
@@ -25,7 +28,7 @@ def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old
         # Walk through all directories and files in the dataset_path
         for root, dirs, files in os.walk(dataset_path):
             for file in files:
-                if file.endswith("muscle_activations.csv"):
+                if file.endswith("mint_metadata.csv"):
                     continue
                 if file.endswith(".csv"):
                     # Construct the full file path
@@ -55,13 +58,17 @@ def concatenate_mint_metadata(dataset_path: str, fillna: bool = True, delete_old
     return df_concat
 
 
-def load_all_pkl_files(dataset_path: str, metadata: pd.DataFrame, file_type: str = "muscle_activations"):
+def load_all_pkl_files(
+    dataset_path: str, metadata: pd.DataFrame, file_type: str = "muscle_activations"
+):
     """
     Loads all the pkl files for the given file_type and returns a dictionary of dataframes.
     """
     pkl_files = {}
     for path_id in metadata.index:
-        pkl_files[path_id] = load_pkl_file(dataset_path, metadata.loc[path_id, "data_path"], file_type)
+        pkl_files[path_id] = load_pkl_file(
+            dataset_path, metadata.loc[path_id, "data_path"], file_type
+        )
     return pkl_files
 
 
@@ -73,8 +80,24 @@ def convert_types_mint_metadata(df: pd.DataFrame):
     df (pd.DataFrame): The input dataframe from the mint dataset
     """
     df = df.astype(str)  # Change all other columns to str
-    df[["height_cm", "weight_kg", "babel_sid", "amass_dur", "analysed_dur", "analysed_%"]] = df[
-        ["height_cm", "weight_kg", "babel_sid", "amass_dur", "analysed_dur", "analysed_%"]
+    df[
+        [
+            "height_cm",
+            "weight_kg",
+            "babel_sid",
+            "amass_dur",
+            "analysed_dur",
+            "analysed_%",
+        ]
+    ] = df[
+        [
+            "height_cm",
+            "weight_kg",
+            "babel_sid",
+            "amass_dur",
+            "analysed_dur",
+            "analysed_%",
+        ]
     ].astype(float)
     df["babel_sid"] = df["babel_sid"].fillna(-1)
     df[["babel_sid"]] = df[["babel_sid"]].astype(int)
@@ -89,11 +112,15 @@ def append_path_id_to_mint_metadata(df: pd.DataFrame):
     Parameters:
     df (pd.DataFrame): The input dataframe from the mint dataset
     """
-    df["path_id"] = df["data_path"].str.split("/").str[-2:].str.join("/").str.replace("_poses", "")
+    df["path_id"] = (
+        df["data_path"].str.split("/").str[-2:].str.join("/").str.replace("_poses", "")
+    )
     return df
 
 
-def get_pkl_file_path(dataset_path: str, data_path: str, file_type: str = "muscle_activations"):
+def get_pkl_file_path(
+    dataset_path: str, data_path: str, file_type: str = "muscle_activations"
+):
     """
     Returns the full file path of the pkl file for the given data_path and filename.
 
@@ -107,7 +134,9 @@ def get_pkl_file_path(dataset_path: str, data_path: str, file_type: str = "muscl
     return osp.join(dataset_path, data_path, filenames[file_type])
 
 
-def load_pkl_file(dataset_path: str, data_path: str, file_type: str = "muscle_activations"):
+def load_pkl_file(
+    dataset_path: str, data_path: str, file_type: str = "muscle_activations"
+):
     """
     Returns the dataframe of the pkl file for the given data_path and filename.
 
