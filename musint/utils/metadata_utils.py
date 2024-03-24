@@ -39,6 +39,7 @@ def concatenate_mint_metadata(
                     df_list.append(df)
 
         # Concatenate all dataframes in the list into a single dataframe
+        df_list = [df.dropna(how='all', axis=1) for df in df_list]
         df_concat = pd.concat(df_list, ignore_index=True)
 
         df_concat = convert_types_mint_metadata(df_concat)

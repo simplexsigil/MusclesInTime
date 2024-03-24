@@ -1,3 +1,4 @@
+import argparse
 import ast
 import os
 import os.path as osp
@@ -375,32 +376,13 @@ class MintDataset(data.Dataset):
 
 if __name__ == "__main__":
     """Example usage of the MintDataset class"""
-    dataset_path = "/lsdf/data/activity/MuscleSim/musclesim_dataset"
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--dataset_path', required=True)
+
+    dataset_path = parser.parse_args().dataset_path
     mint_dataset = MintDataset(dataset_path, use_cache=False)
-    sample = mint_dataset[0]
-    print(sample.get_forces(None))
-    sample_by_path_id = mint_dataset.by_path_id("s1/acting2")
-    print(sample_by_path_id.fps)
     sample_by_path = mint_dataset.by_path("TotalCapture/TotalCapture/s1/acting2_poses")
-    print(sample_by_path.path_id)
+    sample_by_path_id = mint_dataset.by_path_id("s1/acting2")
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
-    print(sample_by_babel_sid.get_forces(None))
-    sample_by_subject_and_sequence = mint_dataset.by_subject_and_sequence(
-        "s1", "acting2_poses"
-    )
-    print(sample_by_subject_and_sequence.get_forces(None))
-    sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")
-    print(sample_by_humanml3d_name[0].get_forces(None))
-    sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260.npy")
-    print(sample_by_humanml3d_name[0].get_forces(None))
-    sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260.npy")
-    print(sample_by_humanml3d_name[0].get_forces(None))
-    print("Index values:")
-    pd.set_option("display.max_rows", None)
-
-    print(sample_by_humanml3d_name[0].get_forces(None, target_fps=50).index.values)
-    print(sample_by_humanml3d_name[0].get_valid_indices((10, 1000), 20.0))
-    print(sample_by_humanml3d_name[0].get_gaps())
-    print(sample_by_humanml3d_name[0].has_gap)
-
-    print(sample_by_humanml3d_name[0].muscle_activations.index)
+    sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")[0]
+    valid_indices = sample_by_humanml3d_name.get_valid_indices((10, 1000), 20.0)
