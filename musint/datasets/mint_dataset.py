@@ -36,7 +36,7 @@ class MintData:
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
         self.has_gap = ast.literal_eval(sample["gap"])
-        self.path_id = osp.join(sample["subject"], sample["sequence"]).replace("_poses", "")
+        self.path_id = MintData.path_id_from_sample(sample)
 
         self.muscle_activations = load_pkl_file(self.dataset_path, self.data_path, "muscle_activations")
         self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
@@ -49,6 +49,10 @@ class MintData:
 
         self.humanml3d_source_path = self.get_humanml3d_source_path()
         self.humanml3d_name = self.get_humanml3d_names()
+
+    @classmethod
+    def path_id_from_sample(cls, sample: pd.Series):
+        return osp.join(sample["subject"], sample["sequence"]).replace("_poses", "")
 
     def get_muscle_activations(
         self,
@@ -265,6 +269,10 @@ class MintDataset(data.Dataset):
         sample = self.metadata.iloc[idx]
         return MintData(sample, self.dataset_path)
 
+    @property
+    def path_ids(self):
+        return PathIdIndexer(self)
+
     def by_path_id(self, path_id: str):
         """
         Get a sample by its path_id
@@ -371,6 +379,19 @@ class MintDataset(data.Dataset):
             return self.by_subject_and_sequence(subject, sequence), frames
 
 
+class PathIdIndexer:
+    """
+    This indexer allows for iterating over path_ids without instantiating MintData elements (which includes loading the data into memory).
+    """
+
+    def __init__(self, mint_dataset: MintDataset):
+        self.mint_dataset = mint_dataset
+
+    def __getitem__(self, idx: str):
+        sample = self.mint_dataset.metadata.iloc[idx]
+        return MintData.path_id_from_sample(sample)
+
+
 if __name__ == "__main__":
     """Example usage of the MintDataset class"""
     parser = argparse.ArgumentParser()
@@ -380,7 +401,9 @@ if __name__ == "__main__":
     mint_dataset = MintDataset(dataset_path, use_cache=False)
     sample_by_path = mint_dataset.by_path("TotalCapture/TotalCapture/s1/acting2_poses")
     print(sample_by_path)
-    sample_by_path_id = mint_dataset.by_path_id("s1/acting2")
+    path_id = mint_dataset.path_ids[0]
+    print(path_id)
+    sample_by_path_id = mint_dataset.by_path_id(path_id)
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
     sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")[0]
     valid_indices = sample_by_humanml3d_name.get_valid_indices((10, 1000), 20.0)

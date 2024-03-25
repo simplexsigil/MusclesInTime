@@ -12,6 +12,7 @@ def trim_mint_dataframe(
     rolling_average=False,
     target_frame_count=64,
     as_numpy=True,
+    max_frame_gap=(1 / 50) + 1e-2,  # This is the expected gap given that the MinT dataset is sampled at 50Hz.
 ):
     """
     Resample muscle activations to the given time window and fps. Returns the values as a numpy array
@@ -29,16 +30,12 @@ def trim_mint_dataframe(
     resampling_ms = 1000 / target_fps
 
     # trim the dataframe to the time window
-    filtered_df = df[
-        df.index.to_series().between(time_window[0], time_window[1], inclusive="both")
-    ]
+    filtered_df = df[df.index.to_series().between(time_window[0], time_window[1], inclusive="both")]
 
     # check for a gap in the indices which resemble float timestamps
     differences = filtered_df.index.to_series().diff()
-    if any(
-        differences > (1 / 50) + 1e-2
-    ):  # This is the expected gap given that the MinT dataset is sampled at 50Hz.
-        raise ValueError("Found a gap in the timestamps larger than 0.02s")
+    if any(differences > max_frame_gap):  # This is the expected gap given that the MinT dataset is sampled at 50Hz.
+        raise ValueError(f"Found a gap in the timestamps larger than {max_frame_gap:.2f}s")
 
     # convert to datetime
     filtered_df.index = pd.to_datetime(filtered_df.index, unit="s")
