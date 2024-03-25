@@ -6,14 +6,20 @@ from typing import Tuple
 
 import numpy as np
 import pandas as pd
+import torch
 from torch.utils import data
+from torch.utils.data import random_split
 
 from musint.utils.dataframe_utils import (
     frame_to_time,
     time_to_frame,
     trim_mint_dataframe,
 )
-from musint.utils.metadata_utils import concatenate_mint_metadata, load_pkl_file
+from musint.utils.hml3d_utils.humanml3d_utils import segment_motions
+from musint.utils.metadata_utils import (
+    concatenate_mint_metadata,
+    load_pkl_file,
+)
 
 
 class MintData:
@@ -32,6 +38,9 @@ class MintData:
         self.subject = sample["subject"]
         self.sequence = sample["sequence"]
         self.dataset = sample["dataset"]
+        self.subdataset_path = osp.join(
+            self.data_path.split("/")[0], self.data_path.split("/")[1]
+        )
         self.gender = sample["gender"]
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
@@ -202,11 +211,14 @@ class MintData:
 
         return gap_tuples
 
-    def get_humanml3d_source_path(self):
+    def get_humanml3d_source_path(self, data_root: str = "."):
         """
         Get the source path of the HumanML3D sample
         """
-        source_path = osp.join("./pose_data", self.dataset, self.subject, self.sequence + ".npy")
+        dataset = self.data_path.split("/")[1]
+        source_path = osp.join(
+            data_root, "pose_data", dataset, self.subject, self.sequence + ".npy"
+        )
 
         return source_path
 
@@ -377,6 +389,72 @@ class MintDataset(data.Dataset):
             return self.by_subject_and_sequence(subject, sequence), frame_times
         else:
             return self.by_subject_and_sequence(subject, sequence), frames
+
+
+
+
+    def generate_segment_data(
+        self, data_root: str, save_dir: str, csv_file: str, dataset=["val"]
+    ):
+        """
+        Generates segments of motion data and saves them as npy files in the save_dir from the pose_data of AMASS dataset.
+        The motion data segments are generated based on the availability of the mint data.
+
+        Args:
+            mint_dataset (MintDataset): The MintDataset object containing the dataset information.
+            save_dir (str): Directory path where the generated segments will be saved.
+            csv_file (str): File path of the CSV file where segment information will be written.
+
+        Returns:
+            None
+        """
+        generator = torch.Generator()
+        generator.manual_seed(0)
+        train_size = int(0.7 * len(self))
+        val_size = int(0.2 * len(self))
+        test_size = len(self) - train_size - val_size
+
+        train, val, test = random_split(
+            dataset=self, lengths=[train_size, val_size, test_size], generator=generator
+        )
+
+        for dataset in dataset:
+            if dataset == "train":
+                data = train
+            elif dataset == "val":
+                data = val
+            elif dataset == "test":
+                data = test
+
+            segment_motions(data_root, save_dir, csv_file, data, dataset)
+
+
+
+    def generate_chat_prompts(self, save_dir: str, path: str, start_frame: int, end_frame: int, code):
+        """
+        Generates chat prompts for the MINT dataset
+
+        Args:
+            save_dir (str): Directory path where the generated chat prompts will be saved.
+
+        Returns:
+            None
+        """
+        dir_name, file_name = os.path.split(path)
+        file_name = file_name.removesuffix(".npy")
+        if file_name.startswith('M_'):
+            file_name = file_name[2:]
+        sample_path = os.path.join(dir_name, file_name[:-2])
+
+        mint_data = self.by_path(sample_path)
+        time_window = (frame_to_time(start_frame, 20.0), frame_to_time(end_frame, 20.0))
+        muscle_activation = mint_data.get_muscle_activations(time_window)
+        grf = mint_data.get_grf(time_window)
+        forces = mint_data.get_forces(time_window)
+
+        # TODO: In progress
+
+        print(muscle_activation)
 
 
 class PathIdIndexer:
