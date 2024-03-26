@@ -457,7 +457,7 @@ class BabelData:
         actions: List[str] = []
         if isinstance(self.frame_ann, FrameAnn):
             for label in self.frame_ann.labels:
-                if label.start_t is not None and label.end_t is not None:
+                if label.start_t is not None and label.end_t is not None and label.end_t > label.start_t + 1e-3:
                     # overlap between the label and the time range
                     overlap = min(end_time, label.end_t) - max(start_time, label.start_t)
                     if overlap / (label.end_t - label.start_t) >= coverage_threshold:
@@ -753,8 +753,6 @@ class BabelDataset:
                     data[v.babel_sid] = v
 
         return BabelDataset(data)
-
-    
 
 
 if __name__ == "__main__":
