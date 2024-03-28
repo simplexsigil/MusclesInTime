@@ -27,7 +27,7 @@ class MintData:
     A class to represent the muscle activations, grf and forces of a sample from the MINT dataset
     """
 
-    def __init__(self, sample: pd.Series, dataset_path: str):
+    def __init__(self, sample: pd.Series, dataset_path: str, pyarrow: bool = False, load_humanml3d_names: bool = True):
         self.dataset_path = dataset_path
         self.data_path = sample["data_path"]
         self.full_data_path = f"{dataset_path}/{self.data_path}"
@@ -38,9 +38,7 @@ class MintData:
         self.subject = sample["subject"]
         self.sequence = sample["sequence"]
         self.dataset = sample["dataset"]
-        self.subdataset_path = osp.join(
-            self.data_path.split("/")[0], self.data_path.split("/")[1]
-        )
+        self.subdataset_path = osp.join(self.data_path.split("/")[0], self.data_path.split("/")[1])
         self.gender = sample["gender"]
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
@@ -51,13 +49,18 @@ class MintData:
         self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
         self.forces = load_pkl_file(self.dataset_path, self.data_path, "forces")
 
+        if pyarrow:
+            self.muscle_activations = self.muscle_activations.convert_dtypes(dtype_backend="pyarrow")
+            self.grf = self.grf.convert_dtypes(dtype_backend="pyarrow")
+            self.forces = self.forces.convert_dtypes(dtype_backend="pyarrow")
+
         self.start_time = self.muscle_activations.index[0]
         self.end_time = self.muscle_activations.index[-1]
         self.num_frames = self.muscle_activations.shape[0]
         self.fps = 50.0  # all the samples in the dataset have a fixed fps of 50.0
-
-        self.humanml3d_source_path = self.get_humanml3d_source_path()
-        self.humanml3d_name = self.get_humanml3d_names()
+        if load_humanml3d_names:
+            self.humanml3d_source_path = self.get_humanml3d_source_path()
+            self.humanml3d_name = self.get_humanml3d_names()
 
     @classmethod
     def path_id_from_sample(cls, sample: pd.Series):
@@ -216,9 +219,7 @@ class MintData:
         Get the source path of the HumanML3D sample
         """
         dataset = self.data_path.split("/")[1]
-        source_path = osp.join(
-            data_root, "pose_data", dataset, self.subject, self.sequence + ".npy"
-        )
+        source_path = osp.join(data_root, "pose_data", dataset, self.subject, self.sequence + ".npy")
 
         return source_path
 
@@ -268,9 +269,21 @@ class MintDataset(data.Dataset):
     transform (Optional[Callable]): A transform to apply to the data
     """
 
-    def __init__(self, dataset_path: str, use_cache: bool = True):
+    def __init__(
+        self,
+        dataset_path: str,
+        use_cache: bool = True,
+        keep_in_memory: bool = False,
+        pyarrow: bool = False,
+        load_humanml3d_names: bool = True,
+    ):
         self.dataset_path = dataset_path
         self.metadata = concatenate_mint_metadata(dataset_path, delete_old=not use_cache)
+        self.keep_in_memory = keep_in_memory
+        self.memorized_samples = {}
+        self.pyarrow = pyarrow
+        self.load_humanml3d_names = load_humanml3d_names
+        self.__path_indexer = PathIdIndexer(self)
 
     def __len__(self):
         # return the number of samples of the dataframe (metadata)
@@ -278,12 +291,23 @@ class MintDataset(data.Dataset):
 
     def __getitem__(self, idx: int) -> MintData:
         """Get a sample by its index"""
+        path_id = self.path_ids[idx]
+        if self.keep_in_memory and path_id in self.memorized_samples:
+            return self.memorized_samples[path_id]
+
         sample = self.metadata.iloc[idx]
-        return MintData(sample, self.dataset_path)
+        mint_data = MintData(
+            sample, self.dataset_path, pyarrow=self.pyarrow, load_humanml3d_names=self.load_humanml3d_names
+        )
+
+        if self.keep_in_memory:
+            self.memorized_samples[path_id] = mint_data
+
+        return mint_data
 
     @property
     def path_ids(self):
-        return PathIdIndexer(self)
+        return self.__path_indexer
 
     def by_path_id(self, path_id: str):
         """
@@ -390,12 +414,7 @@ class MintDataset(data.Dataset):
         else:
             return self.by_subject_and_sequence(subject, sequence), frames
 
-
-
-
-    def generate_segment_data(
-        self, data_root: str, save_dir: str, csv_file: str, dataset=["val"]
-    ):
+    def generate_segment_data(self, data_root: str, save_dir: str, csv_file: str, dataset=["val"]):
         """
         Generates segments of motion data and saves them as npy files in the save_dir from the pose_data of AMASS dataset.
         The motion data segments are generated based on the availability of the mint data.
@@ -414,9 +433,7 @@ class MintDataset(data.Dataset):
         val_size = int(0.2 * len(self))
         test_size = len(self) - train_size - val_size
 
-        train, val, test = random_split(
-            dataset=self, lengths=[train_size, val_size, test_size], generator=generator
-        )
+        train, val, test = random_split(dataset=self, lengths=[train_size, val_size, test_size], generator=generator)
 
         for dataset in dataset:
             if dataset == "train":
@@ -427,8 +444,6 @@ class MintDataset(data.Dataset):
                 data = test
 
             segment_motions(data_root, save_dir, csv_file, data, dataset)
-
-
 
     def generate_chat_prompts(self, save_dir: str, path: str, start_frame: int, end_frame: int, code):
         """
@@ -442,7 +457,7 @@ class MintDataset(data.Dataset):
         """
         dir_name, file_name = os.path.split(path)
         file_name = file_name.removesuffix(".npy")
-        if file_name.startswith('M_'):
+        if file_name.startswith("M_"):
             file_name = file_name[2:]
         sample_path = os.path.join(dir_name, file_name[:-2])
 

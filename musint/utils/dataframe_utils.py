@@ -1,6 +1,7 @@
 from typing import Tuple
 
 import pandas as pd
+import numpy as np
 
 EPOCH = pd.Timestamp("1970-01-01")
 
@@ -58,6 +59,45 @@ def trim_mint_dataframe(
         return filtered_df.values
     else:
         return filtered_df
+
+
+def trim_mint_dataframe_v2(
+    df: pd.DataFrame,
+    time_window: Tuple[float, float],
+    target_frame_count=64,
+    as_numpy=True,
+):
+    """
+    Trims and resamples a DataFrame from the MinT dataset to a specified time window and frame count.
+    Optionally returns the result as a NumPy array.
+
+    Parameters:
+    - df (pd.DataFrame): Input DataFrame containing muscle activation data from the MinT dataset.
+    - time_window (Tuple[float, float]): Tuple specifying the start and end times of the desired time window.
+    - target_frame_count (int, optional): The number of frames to resample the data to within the time window. Default is 64.
+    - as_numpy (bool, optional): If True, the resulting resampled data is returned as a NumPy array; otherwise, as a DataFrame. Default is True.
+
+    Returns:
+    - If as_numpy is True: NumPy array containing the resampled muscle activation data.
+    - If as_numpy is False: DataFrame containing the resampled muscle activation data.
+    """
+
+    filt_df = df[(df.index >= time_window[0]) & (df.index <= time_window[1])]
+
+    # Create a grid of target time points
+    grid = np.linspace(start=time_window[0], stop=time_window[1], num=target_frame_count)
+
+    # Compute the absolute differences between each grid point and all index values in a vectorized manner
+    abs_diff_matrix = np.abs(filt_df.index.values[:, np.newaxis] - grid)
+
+    # Find the index of the closest time point for each grid point
+    closest_indices = abs_diff_matrix.argmin(axis=0)
+
+    # Select the closest rows based on the indices, ensuring each row is selected only once
+    unique_indices = np.unique(closest_indices)
+    closest_rows = filt_df.iloc[unique_indices]
+
+    return closest_rows.values if as_numpy else closest_rows
 
 
 def frame_to_time(frame: int, fps: float):
