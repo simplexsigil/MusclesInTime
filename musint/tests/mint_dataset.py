@@ -160,16 +160,16 @@ class TestMintDataset(unittest.TestCase):
             else:
                 self.assertListEqual(gaps, [])
 
-    def assert_sample_example(self, sample_by_subject_and_sequence):
-        assert sample_by_subject_and_sequence.babel_sid == 12906
-        assert sample_by_subject_and_sequence.subject == "s1"
-        assert sample_by_subject_and_sequence.sequence == "acting2_poses"
-        assert sample_by_subject_and_sequence.dataset == "TotalCapture"
-        assert sample_by_subject_and_sequence.path_id == "s1/acting2"
-        assert sample_by_subject_and_sequence.data_path == "TotalCapture/TotalCapture/s1/acting2_poses"
-        assert not sample_by_subject_and_sequence.has_gap
-        assert "002418.npy" in sample_by_subject_and_sequence.humanml3d_name
-        assert "003266.npy" in sample_by_subject_and_sequence.humanml3d_name
+    def assert_sample_example(self, sample):
+        assert sample.babel_sid == 12906
+        assert sample.subject == "s1"
+        assert sample.sequence == "acting2_poses"
+        assert sample.dataset == "TotalCapture"
+        assert sample.path_id == "s1/acting2"
+        assert sample.data_path == "TotalCapture/TotalCapture/s1/acting2_poses"
+        assert not sample.has_gap
+        assert "002418.npy" in sample.humanml3d_name
+        assert "003266.npy" in sample.humanml3d_name
 
 if __name__ == "__main__":
     unittest.main(argv=['first-arg-is-ignored'], exit=False)
