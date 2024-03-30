@@ -27,7 +27,13 @@ class MintData:
     A class to represent the muscle activations, grf and forces of a sample from the MINT dataset
     """
 
-    def __init__(self, sample: pd.Series, dataset_path: str, pyarrow: bool = False, load_humanml3d_names: bool = True):
+    def __init__(
+        self,
+        sample: pd.Series,
+        dataset_path: str,
+        pyarrow: bool = False,
+        load_humanml3d_names: bool = True,
+    ):
         self.dataset_path = dataset_path
         self.data_path = sample["data_path"]
         self.full_data_path = f"{dataset_path}/{self.data_path}"
@@ -38,19 +44,25 @@ class MintData:
         self.subject = sample["subject"]
         self.sequence = sample["sequence"]
         self.dataset = sample["dataset"]
-        self.subdataset_path = osp.join(self.data_path.split("/")[0], self.data_path.split("/")[1])
+        self.subdataset_path = osp.join(
+            self.data_path.split("/")[0], self.data_path.split("/")[1]
+        )
         self.gender = sample["gender"]
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
         self.has_gap = ast.literal_eval(sample["gap"])
         self.path_id = MintData.path_id_from_sample(sample)
 
-        self.muscle_activations = load_pkl_file(self.dataset_path, self.data_path, "muscle_activations")
+        self.muscle_activations = load_pkl_file(
+            self.dataset_path, self.data_path, "muscle_activations"
+        )
         self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
         self.forces = load_pkl_file(self.dataset_path, self.data_path, "forces")
 
         if pyarrow:
-            self.muscle_activations = self.muscle_activations.convert_dtypes(dtype_backend="pyarrow")
+            self.muscle_activations = self.muscle_activations.convert_dtypes(
+                dtype_backend="pyarrow"
+            )
             self.grf = self.grf.convert_dtypes(dtype_backend="pyarrow")
             self.forces = self.forces.convert_dtypes(dtype_backend="pyarrow")
 
@@ -159,7 +171,9 @@ class MintData:
             as_numpy,
         )
 
-    def get_valid_indices(self, time_window: Tuple[float, float] = None, target_fps=20.0, as_time=True):
+    def get_valid_indices(
+        self, time_window: Tuple[float, float] = None, target_fps=20.0, as_time=True
+    ):
         """
         Gets the valid indices of the muscle activations given the frame indices.
         Returns the indices as frames or time corresponding to the target fps.
@@ -171,10 +185,16 @@ class MintData:
             time_window = (self.start_time, self.end_time)
 
         trimmed_muscle_activation_index = self.muscle_activations.index[
-            self.muscle_activations.index.to_series().between(time_window[0], time_window[1])
+            self.muscle_activations.index.to_series().between(
+                time_window[0], time_window[1]
+            )
         ]
 
-        frame_indices = np.round(trimmed_muscle_activation_index * target_fps, 0).astype(int).unique()
+        frame_indices = (
+            np.round(trimmed_muscle_activation_index * target_fps, 0)
+            .astype(int)
+            .unique()
+        )
 
         if as_time:
             frame_times = frame_indices / target_fps
@@ -188,7 +208,9 @@ class MintData:
         """
         # resample index of the muscle activations to fps
         muscle_activation_index = self.muscle_activations.index
-        muscle_activation_index = np.round(muscle_activation_index * self.fps).astype(int)
+        muscle_activation_index = np.round(muscle_activation_index * self.fps).astype(
+            int
+        )
 
         differences = pd.Series(muscle_activation_index).diff()
 
@@ -200,7 +222,9 @@ class MintData:
         for gap_index in gap_indices:
             pos2 = gap_index
             time = frame_to_time(gap_index, self.fps)
-            previous_frame = self.muscle_activations.index.get_loc(frame_to_time(pos2, self.fps)) - 1
+            previous_frame = (
+                self.muscle_activations.index.get_loc(frame_to_time(pos2, self.fps)) - 1
+            )
             previous_time = self.muscle_activations.index[previous_frame]
             if as_frame:
                 gap_tuples.append(
@@ -219,7 +243,9 @@ class MintData:
         Get the source path of the HumanML3D sample
         """
         dataset = self.data_path.split("/")[1]
-        source_path = osp.join(data_root, "pose_data", dataset, self.subject, self.sequence + ".npy")
+        source_path = osp.join(
+            data_root, "pose_data", dataset, self.subject, self.sequence + ".npy"
+        )
 
         return source_path
 
@@ -227,10 +253,14 @@ class MintData:
         """
         Get the humanml3d names of the sample
         """
-        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv")
+        csv_path = osp.join(
+            os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv"
+        )
         df = pd.read_csv(csv_path)
 
-        humanml3d_names = df[df["source_path"] == self.humanml3d_source_path]["new_name"].values
+        humanml3d_names = df[df["source_path"] == self.humanml3d_source_path][
+            "new_name"
+        ].values
 
         return humanml3d_names
 
@@ -278,7 +308,9 @@ class MintDataset(data.Dataset):
         load_humanml3d_names: bool = True,
     ):
         self.dataset_path = dataset_path
-        self.metadata = concatenate_mint_metadata(dataset_path, delete_old=not use_cache)
+        self.metadata = concatenate_mint_metadata(
+            dataset_path, delete_old=not use_cache
+        )
         self.keep_in_memory = keep_in_memory
         self.memorized_samples = {}
         self.pyarrow = pyarrow
@@ -297,7 +329,10 @@ class MintDataset(data.Dataset):
 
         sample = self.metadata.iloc[idx]
         mint_data = MintData(
-            sample, self.dataset_path, pyarrow=self.pyarrow, load_humanml3d_names=self.load_humanml3d_names
+            sample,
+            self.dataset_path,
+            pyarrow=self.pyarrow,
+            load_humanml3d_names=self.load_humanml3d_names,
         )
 
         if self.keep_in_memory:
@@ -369,7 +404,9 @@ class MintDataset(data.Dataset):
         filtered = self.metadata[self.metadata["subject"] == subject]
         filtered = filtered[filtered["sequence"] == sequence]
         if filtered.empty:
-            raise ValueError(f"No sample found with subject: {subject} and sequence: {sequence}")
+            raise ValueError(
+                f"No sample found with subject: {subject} and sequence: {sequence}"
+            )
         idx = self.metadata.index.get_loc(filtered.index[0])
         return self[idx]
 
@@ -384,7 +421,9 @@ class MintDataset(data.Dataset):
         MintData: The sample
         (Tuple[float, float]): The start and end times of the sample if as_time is True else the start and end frames of the HumanML3D sample
         """
-        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv")
+        csv_path = osp.join(
+            os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv"
+        )
         df = pd.read_csv(csv_path)
 
         if not humanml3d_name.endswith(".npy"):
@@ -414,7 +453,28 @@ class MintDataset(data.Dataset):
         else:
             return self.by_subject_and_sequence(subject, sequence), frames
 
-    def generate_segment_data(self, data_root: str, save_dir: str, csv_file: str, dataset=["val"]):
+    def by_segment_name(self, path: str):
+        """
+        Retrieves a sample from the dataset based on the segment name.
+
+        Args:
+            path (str): The path of the segment file.
+
+        Returns:
+            Sample: The sample corresponding to the segment name.
+        """
+        dir_name, file_name = os.path.split(path)
+        file_name = file_name.removesuffix(".npy")
+        if file_name.startswith("M_"):
+            file_name = file_name[2:]
+        # remove everything after the last _
+        file_name = file_name.rsplit("_", 1)[0]
+        sample_path = os.path.join(dir_name, file_name)
+        return self.by_path(sample_path)
+
+    def generate_segment_data(
+        self, data_root: str, save_dir: str, csv_file: str, dataset=["val"]
+    ):
         """
         Generates segments of motion data and saves them as npy files in the save_dir from the pose_data of AMASS dataset.
         The motion data segments are generated based on the availability of the mint data.
@@ -433,7 +493,9 @@ class MintDataset(data.Dataset):
         val_size = int(0.2 * len(self))
         test_size = len(self) - train_size - val_size
 
-        train, val, test = random_split(dataset=self, lengths=[train_size, val_size, test_size], generator=generator)
+        train, val, test = random_split(
+            dataset=self, lengths=[train_size, val_size, test_size], generator=generator
+        )
 
         for dataset in dataset:
             if dataset == "train":
@@ -444,32 +506,6 @@ class MintDataset(data.Dataset):
                 data = test
 
             segment_motions(data_root, save_dir, csv_file, data, dataset)
-
-    def generate_chat_prompts(self, save_dir: str, path: str, start_frame: int, end_frame: int, code):
-        """
-        Generates chat prompts for the MINT dataset
-
-        Args:
-            save_dir (str): Directory path where the generated chat prompts will be saved.
-
-        Returns:
-            None
-        """
-        dir_name, file_name = os.path.split(path)
-        file_name = file_name.removesuffix(".npy")
-        if file_name.startswith("M_"):
-            file_name = file_name[2:]
-        sample_path = os.path.join(dir_name, file_name[:-2])
-
-        mint_data = self.by_path(sample_path)
-        time_window = (frame_to_time(start_frame, 20.0), frame_to_time(end_frame, 20.0))
-        muscle_activation = mint_data.get_muscle_activations(time_window)
-        grf = mint_data.get_grf(time_window)
-        forces = mint_data.get_forces(time_window)
-
-        # TODO: In progress
-
-        print(muscle_activation)
 
 
 class PathIdIndexer:
