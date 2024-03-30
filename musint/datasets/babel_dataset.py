@@ -1,7 +1,8 @@
 import json
-from typing import Tuple, Union, Dict, List, Optional
-import numpy as np
 from collections import OrderedDict
+from typing import Dict, List, Optional, Tuple, Union
+
+import numpy as np
 
 babel_action_cats_encode = {
     "a pose": 0,
@@ -327,7 +328,13 @@ class SeqAnn:
     - labels (Optional[List[Label]]): A list of `Label` objects representing the annotated actions within the sequence.
     """
 
-    def __init__(self, babel_lid: str, anntr_id: str, mul_act: bool, labels: Optional[List[Label]] = None):
+    def __init__(
+        self,
+        babel_lid: str,
+        anntr_id: str,
+        mul_act: bool,
+        labels: Optional[List[Label]] = None,
+    ):
         self.babel_lid: str = babel_lid
         self.anntr_id: str = anntr_id
         self.mul_act: bool = mul_act
@@ -357,7 +364,13 @@ class FrameAnn:
     - labels (Optional[List[Label]]): A list of `Label` objects representing the annotated actions within the frames.
     """
 
-    def __init__(self, babel_lid: str, anntr_id: str, mul_act: bool, labels: Optional[List[Label]] = None):
+    def __init__(
+        self,
+        babel_lid: str,
+        anntr_id: str,
+        mul_act: bool,
+        labels: Optional[List[Label]] = None,
+    ):
         self.babel_lid: str = babel_lid
         self.anntr_id: str = anntr_id
         self.mul_act: bool = mul_act
@@ -434,7 +447,11 @@ class BabelData:
         actions: List[str] = []
         if isinstance(self.seq_ann, SeqAnn):
             for label in self.seq_ann.labels:
-                act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
+                act_cat = (
+                    [babel_action_cats_encode[a] for a in label.act_cat]
+                    if encoded
+                    else label.act_cat
+                )
                 actions.extend(act_cat)
         return (0.0, self.dur, actions)
 
@@ -457,11 +474,21 @@ class BabelData:
         actions: List[str] = []
         if isinstance(self.frame_ann, FrameAnn):
             for label in self.frame_ann.labels:
-                if label.start_t is not None and label.end_t is not None and label.end_t > label.start_t + 1e-3:
+                if (
+                    label.start_t is not None
+                    and label.end_t is not None
+                    and label.end_t > label.start_t + 1e-3
+                ):
                     # overlap between the label and the time range
-                    overlap = min(end_time, label.end_t) - max(start_time, label.start_t)
+                    overlap = min(end_time, label.end_t) - max(
+                        start_time, label.start_t
+                    )
                     if overlap / (label.end_t - label.start_t) >= coverage_threshold:
-                        act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
+                        act_cat = (
+                            [babel_action_cats_encode[a] for a in label.act_cat]
+                            if encoded
+                            else label.act_cat
+                        )
                         actions.append((label.start_t, label.end_t, act_cat))
         else:
             actions.append(self.sequence_actions())
@@ -470,7 +497,9 @@ class BabelData:
 
         return actions
 
-    def clip_actions_at(self, time_point: float, encoded=False) -> List[Tuple[float, float, str]]:
+    def clip_actions_at(
+        self, time_point: float, encoded=False
+    ) -> List[Tuple[float, float, str]]:
         """
         Returns the clip/frame level actions of the clips that take place during the specified time point.
         If no clip level actions are available, defaults to sequence level actions.
@@ -516,7 +545,9 @@ class BabelData:
                     proc_labels.append(label.proc_label)
         return (0.0, self.dur, proc_labels)
 
-    def clip_proc_labels_in_range(self, start_time: float, end_time: float) -> List[Tuple[float, float, str]]:
+    def clip_proc_labels_in_range(
+        self, start_time: float, end_time: float
+    ) -> List[Tuple[float, float, str]]:
         """
         Returns a list of clip/frame level processed labels within the specified time range.
 
@@ -531,8 +562,13 @@ class BabelData:
         if isinstance(self.frame_ann, FrameAnn):
             for label in self.frame_ann.labels:
                 if label.start_t is not None and label.end_t is not None:
-                    if start_time <= label.start_t <= end_time or start_time <= label.end_t <= end_time:
-                        proc_labels.append((label.start_t, label.end_t, label.proc_label))
+                    if (
+                        start_time <= label.start_t <= end_time
+                        or start_time <= label.end_t <= end_time
+                    ):
+                        proc_labels.append(
+                            (label.start_t, label.end_t, label.proc_label)
+                        )
         else:
             proc_labels.append(self.sequence_proc_labels())
 
@@ -569,8 +605,12 @@ class BabelData:
                 "url": self.url,
                 "feat_p": self.feat_p,
                 "dur": self.dur,
-                "seq_ann": self.seq_ann.to_dict() if isinstance(self.seq_ann, SeqAnn) else None,
-                "frame_ann": self.frame_ann.to_dict() if isinstance(self.frame_ann, FrameAnn) else None,
+                "seq_ann": self.seq_ann.to_dict()
+                if isinstance(self.seq_ann, SeqAnn)
+                else None,
+                "frame_ann": self.frame_ann.to_dict()
+                if isinstance(self.frame_ann, FrameAnn)
+                else None,
             },
             indent=2,
         )
@@ -614,7 +654,10 @@ class BabelData:
                 frame_ann_data.get("babel_lid", ""),
                 frame_ann_data.get("anntr_id", ""),
                 frame_ann_data.get("mul_act", False),
-                [Label(**label_data) for label_data in frame_ann_data.get("labels", [])],
+                [
+                    Label(**label_data)
+                    for label_data in frame_ann_data.get("labels", [])
+                ],
             )
 
         return BabelData(babel_sid, url, feat_p, dur, seq_ann, frame_ann, split=split)
@@ -637,8 +680,14 @@ class BabelDataset:
     - `from_json_file`: Class method to load a `BabelDataset` instance from a JSON file.
     """
 
-    def __init__(self, data: Union[List[BabelData], OrderedDict], split: Optional[str] = None):
-        self.data = data if isinstance(data, OrderedDict) else OrderedDict((item.babel_sid, item) for item in data)
+    def __init__(
+        self, data: Union[List[BabelData], OrderedDict], split: Optional[str] = None
+    ):
+        self.data = (
+            data
+            if isinstance(data, OrderedDict)
+            else OrderedDict((item.babel_sid, item) for item in data)
+        )
         self.seg_id_mappings = {}
         self.feat_p_mapping = {}
 
@@ -658,7 +707,9 @@ class BabelDataset:
     def __getitem__(self, idx) -> BabelData:
         return list(self.data.values())[idx]
 
-    def by_babel_sid(self, babel_sid: int, raise_missing=True, default=None) -> BabelData:
+    def by_babel_sid(
+        self, babel_sid: int, raise_missing=True, default=None
+    ) -> BabelData:
         try:
             return self.data[babel_sid]
         except KeyError:
@@ -689,7 +740,9 @@ class BabelDataset:
                 return default
 
     @classmethod
-    def act_cat_enc(cls, act_cat: Union[str, List[str], np.ndarray]) -> Union[int, List[int]]:
+    def act_cat_enc(
+        cls, act_cat: Union[str, List[str], np.ndarray]
+    ) -> Union[int, List[int]]:
         if isinstance(act_cat, str):
             # Single string, return the corresponding int
             return cls.babel_action_cats_encode[act_cat]
@@ -703,7 +756,9 @@ class BabelDataset:
             raise ValueError("Unsupported type for act_cat")
 
     @classmethod
-    def act_cat_dec(cls, act_cat: Union[int, List[int], np.ndarray]) -> Union[str, List[str]]:
+    def act_cat_dec(
+        cls, act_cat: Union[int, List[int], np.ndarray]
+    ) -> Union[str, List[str]]:
         if isinstance(act_cat, int):
             # Single integer, return the corresponding string
             return cls.babel_action_cats_dec[act_cat]
@@ -754,10 +809,55 @@ class BabelDataset:
 
         return BabelDataset(data)
 
+    @classmethod
+    def from_directory(cls, directory) -> "BabelDataset":
+        """
+        Create a BabelDataset from a directory containing the JSON files.
+        Assumes that the directory contains train, val, test, extra_train, and extra_val JSON file.
+
+        Args:
+            directory (str): The path to the directory containing the JSON files.
+
+        Returns:
+            BabelDataset: A BabelDataset object containing the data from the JSON files in the directory.
+        """
+        import os
+
+        babel_train_path = os.path.join(directory, "train.json")
+        babel_val_path = os.path.join(directory, "val.json")
+        babel_test_path = os.path.join(directory, "test.json")
+        babel_extra_train_path = os.path.join(directory, "extra_train.json")
+        babel_extra_val_path = os.path.join(directory, "extra_val.json")
+
+        train_dataset = BabelDataset.from_json_file(babel_train_path, split="train")
+        test_dataset = BabelDataset.from_json_file(babel_val_path, split="val")
+        val_dataset = BabelDataset.from_json_file(babel_test_path, split="test")
+
+        extra_train_dataset = BabelDataset.from_json_file(
+            babel_extra_train_path, split="extra_train"
+        )
+        extra_val_dataset = BabelDataset.from_json_file(
+            babel_extra_val_path, split="extra_val"
+        )
+
+        common_dataset = BabelDataset.from_datasets(
+            [
+                train_dataset,
+                test_dataset,
+                val_dataset,
+                extra_train_dataset,
+                extra_val_dataset,
+            ]
+        )
+
+        return common_dataset
+
 
 if __name__ == "__main__":
     print("Testing BabelDataset class")
-    print("Make sure to have the BABEL dataset downloaded and extracted in the correct path.")
+    print(
+        "Make sure to have the BABEL dataset downloaded and extracted in the correct path."
+    )
 
     babel_train_path = "./babel_dataset/babel_v1-0_release/train.json"
     babel_val_path = "./babel_dataset/babel_v1-0_release/val.json"
@@ -770,11 +870,21 @@ if __name__ == "__main__":
     test_dataset = BabelDataset.from_json_file(babel_val_path, split="val")
     val_dataset = BabelDataset.from_json_file(babel_test_path, split="test")
 
-    extra_train_dataset = BabelDataset.from_json_file(babel_extra_train_path, split="extra_train")
-    extra_val_dataset = BabelDataset.from_json_file(babel_extra_val_path, split="extra_val")
+    extra_train_dataset = BabelDataset.from_json_file(
+        babel_extra_train_path, split="extra_train"
+    )
+    extra_val_dataset = BabelDataset.from_json_file(
+        babel_extra_val_path, split="extra_val"
+    )
 
     common_dataset = BabelDataset.from_datasets(
-        [train_dataset, test_dataset, val_dataset, extra_train_dataset, extra_val_dataset]
+        [
+            train_dataset,
+            test_dataset,
+            val_dataset,
+            extra_train_dataset,
+            extra_val_dataset,
+        ]
     )
 
     for d in common_dataset[:50]:
