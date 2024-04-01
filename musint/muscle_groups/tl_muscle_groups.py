@@ -1,6 +1,6 @@
-from itertools import chain
-
 """Defines the muscle groups for the thoracolumbar region of the body and the full name of the muscles."""
+
+from itertools import chain
 
 rectus_abdominis_r = {
     "Rectus Abdominis": "TL_rect_abd_r",
@@ -39,7 +39,6 @@ internal_oblique_r = {
     "Internal Oblique 4": "TL_IO4_r",
     "Internal Oblique 5": "TL_IO5_r",
     "Internal Oblique 6": "TL_IO6_r",
-
 }
 
 internal_oblique_l = {
@@ -346,40 +345,6 @@ quadratus_lumborum_l = {
     "Quadratus Lomborum Anterior I 3-12 3": "TL_QL_ant_I_3-12_3_l",
 }
 
-# quadratus_lumborum_mid_r = [
-#     "QL_mid_L3-12_3_r",
-#     "QL_mid_L3-12_2_r",
-#     "QL_mid_L3-12_1_r",
-#     "QL_mid_L2-12_1_r",
-#     "QL_mid_L4-12_3_r",
-# ]
-
-# quadratus_lumborum_mid_l = [
-#     "QL_mid_L3-12_3_l",
-#     "QL_mid_L3-12_2_l",
-#     "QL_mid_L3-12_1_l",
-#     "QL_mid_L2-12_1_l",
-#     "QL_mid_L4-12_3_l",
-# ]
-
-# quadratus_lumborum_ant_r = [
-#     "QL_ant_I_2-T12_r",
-#     "QL_ant_I_3-T12_r",
-#     "QL_ant_I_2-12_1_r",
-#     "QL_ant_I_3-12_1_r",
-#     "QL_ant_I_3-12_2_r",
-#     "QL_ant_I_3-12_3_r",
-# ]
-
-# quadratus_lumborum_ant_l = [
-#     "QL_ant_I_2-T12_l",
-#     "QL_ant_I_3-T12_l",
-#     "QL_ant_I_2-12_1_l",
-#     "QL_ant_I_3-12_1_l",
-#     "QL_ant_I_3-12_2_l",
-#     "QL_ant_I_3-12_3_l",
-# ]
-
 sternocleidomastoideus_r = {
     "Sternocleidomastoideus Mastoid": "TL_stern_mast",
     "Sternocleidomastoideus Clavicle": "TL_cleid_mast",
@@ -393,106 +358,106 @@ sternocleidomastoideus_l = {
 }
 
 scalenus_r = {
-    "Scalenus Anterior": "scalenus_ant",
-    "Scalenus Medial": "scalenus_med",
-    "Scalenus Posterior": "scalenus_post",
+    "Scalenus Anterior": "TL_scalenus_ant",
+    "Scalenus Medial": "TL_scalenus_med",
+    "Scalenus Posterior": "TL_scalenus_post",
 }
 
 scalenus_l = {
-    "Scalenus Anterior": "scalenus_ant_L",
-    "Scalenus Medial": "scalenus_med_L",
-    "Scalenus Posterior": "scalenus_post_L",
+    "Scalenus Anterior": "TL_scalenus_ant_L",
+    "Scalenus Medial": "TL_scalenus_med_L",
+    "Scalenus Posterior": "TL_scalenus_post_L",
 }
 
 longus_colli_r = {
-    "Longus Colli C1-Thx": "long_col_c1thx",
-    "Longus Colli C5-Thx": "long_col_c5thx",
+    "Longus Colli C1-Thx": "TL_long_col_c1thx",
+    "Longus Colli C5-Thx": "TL_long_col_c5thx",
 }
 
 longus_colli_l = {
-    "Longus Colli C1-Thx": "long_col_c1thx_L",
-    "Longus Colli C5-Thx": "long_col_c5thx_L",
+    "Longus Colli C1-Thx": "TL_long_col_c1thx_L",
+    "Longus Colli C5-Thx": "TL_long_col_c5thx_L",
 }
 
 splenius_capitis_r = {
-    "Splenius Capitis T1": "splen_cap_skl_T1",
-    "Splenius Capitis T2": "splen_cap_skl_T2",
+    "Splenius Capitis T1": "TL_splen_cap_skl_T1",
+    "Splenius Capitis T2": "TL_splen_cap_skl_T2",
 }
 
 splenius_capitis_l = {
-    "Splenius Capitis T1": "splen_cap_skl_T1_L",
-    "Splenius Capitis T2": "splen_cap_skl_T2_L",
+    "Splenius Capitis T1": "TL_splen_cap_skl_T1_L",
+    "Splenius Capitis T2": "TL_splen_cap_skl_T2_L",
 }
 
 splenius_cervicis_r = {
-    "Splenius Cervicis C3 T3": "splen_cerv_c3_T3",
-    "Splenius Cervicis C3 T4": "splen_cerv_c3_T4",
-    "Splenius Cervicis C3 T5": "splen_cerv_c3_T5",
-    "Splenius Cervicis C3 T6": "splen_cerv_c3_T6",
+    "Splenius Cervicis C3 T3": "TL_splen_cerv_c3_T3",
+    "Splenius Cervicis C3 T4": "TL_splen_cerv_c3_T4",
+    "Splenius Cervicis C3 T5": "TL_splen_cerv_c3_T5",
+    "Splenius Cervicis C3 T6": "TL_splen_cerv_c3_T6",
 }
 
 splenius_cervicis_l = {
-    "Splenius Cervicis C3 T3": "splen_cerv_c3_T3_L",
-    "Splenius Cervicis C3 T4": "splen_cerv_c3_T4_L",
-    "Splenius Cervicis C3 T5": "splen_cerv_c3_T5_L",
-    "Splenius Cervicis C3 T6": "splen_cerv_c3_T6_L",
+    "Splenius Cervicis C3 T3": "TL_splen_cerv_c3_T3_L",
+    "Splenius Cervicis C3 T4": "TL_splen_cerv_c3_T4_L",
+    "Splenius Cervicis C3 T5": "TL_splen_cerv_c3_T5_L",
+    "Splenius Cervicis C3 T6": "TL_splen_cerv_c3_T6_L",
 }
 
 semispinalis_capitis_r = {
-    "Semispinalis Capitis Skull Thorax": "semi_cap_sklthx",
+    "Semispinalis Capitis Skull Thorax": "TL_semi_cap_sklthx",
 }
 
 semispinalis_capitis_l = {
-    "Semispinalis Capitis Skull Thorax": "semi_cap_sklthx_L",
+    "Semispinalis Capitis Skull Thorax": "TL_semi_cap_sklthx_L",
 }
 
 semispinalis_cervicis_r = {
-    "Semispinalis Cervicis C3 Thorax": "semi_cerv_c3thx",
+    "Semispinalis Cervicis C3 Thorax": "TL_semi_cerv_c3thx",
 }
 
 semispinalis_cervicis_l = {
-    "Semispinalis Cervicis C3 Thorax": "semi_cerv_c3thx_L",
+    "Semispinalis Cervicis C3 Thorax": "TL_semi_cerv_c3thx_L",
 }
 
 levator_scapulae_r = {
-    "Levator Scapulae": "levator_scap",
+    "Levator Scapulae": "TL_levator_scap",
 }
 
 levator_scapulae_l = {
-    "Levator Scapulae": "levator_scap_L",
+    "Levator Scapulae": "TL_levator_scap_L",
 }
 
 longissi_cervicis_r = {
-    "Longissi Cervicis C4 Thorax": "longissi_cerv_c4thx",
+    "Longissi Cervicis C4 Thorax": "TL_longissi_cerv_c4thx",
 }
 
 longissi_cervicis_l = {
-    "Longissi Cervicis C4 Thorax": "longissi_cerv_c4thx_L",
+    "Longissi Cervicis C4 Thorax": "TL_longissi_cerv_c4thx_L",
 }
 
 iliocostalis_cervicis_r = {
-    "Iliocostalis Cervicis C5 Rib": "iliocost_cerv_c5rib",
+    "Iliocostalis Cervicis C5 Rib": "TL_iliocost_cerv_c5rib",
 }
 
 iliocostalis_cervicis_l = {
-    "Iliocostalis Cervicis C5 Rib": "iliocost_cerv_c5rib_L",
+    "Iliocostalis Cervicis C5 Rib": "TL_iliocost_cerv_c5rib_L",
 }
 
 transversus_abdominus_r = {
-    "Transversus 1": "TR1_r",
-    "Transversus 2": "TR2_r",
-    "Transversus 3": "TR3_r",
-    "Transversus 4": "TR4_r",
-    "Transversus 5": "TR5_r",
+    "Transversus 1": "TL_TR1_r",
+    "Transversus 2": "TL_TR2_r",
+    "Transversus 3": "TL_TR3_r",
+    "Transversus 4": "TL_TR4_r",
+    "Transversus 5": "TL_TR5_r",
 }
 
 
 transversus_abdominus_l = {
-    "Transversus 1": "TR1_l",
-    "Transversus 2": "TR2_l",
-    "Transversus 3": "TR3_l",
-    "Transversus 4": "TR4_l",
-    "Transversus 5": "TR5_l",
+    "Transversus 1": "TL_TR1_l",
+    "Transversus 2": "TL_TR2_l",
+    "Transversus 3": "TL_TR3_l",
+    "Transversus 4": "TL_TR4_l",
+    "Transversus 5": "TL_TR5_l",
 }
 
 
@@ -512,8 +477,12 @@ core_and_abdominal_l_muscles = {
 
 back_and_spinal_r_muscles = {
     "Sacro Spinalis Iliocostalis": list(sacro_spinalis_iliocostalis_r.values()),
-    "Sacro Spinalis Longissimus Thoracis Pars Thoracis": list(sacro_spinalis_longissimus_thoracis_pars_thoracis_r.values()),
-    "Sacro Spinalis Longissimus Thoracis Pars Lumbar": list(sacro_spinalis_longissimus_thoracis_pars_lumbar_r.values()),
+    "Sacro Spinalis Longissimus Thoracis Pars Thoracis": list(
+        sacro_spinalis_longissimus_thoracis_pars_thoracis_r.values()
+    ),
+    "Sacro Spinalis Longissimus Thoracis Pars Lumbar": list(
+        sacro_spinalis_longissimus_thoracis_pars_lumbar_r.values()
+    ),
     "Multifidus Pelvis Region": list(multifidus_pelvis_region_r.values()),
     "Multifidus Neck Region": list(multifidus_neck_region_r.values()),
     "Multifidus Thoracic Region": list(multifidus_thoracic_region_r.values()),
@@ -521,8 +490,12 @@ back_and_spinal_r_muscles = {
 
 back_and_spinal_l_muscles = {
     "Sacro Spinalis Iliocostalis": list(sacro_spinalis_iliocostalis_l.values()),
-    "Sacro Spinalis Longissimus Thoracis Pars Thoracis": list(sacro_spinalis_longissimus_thoracis_pars_thoracis_l.values()),
-    "Sacro Spinalis Longissimus Thoracis Pars Lumbar": list(sacro_spinalis_longissimus_thoracis_pars_lumbar_l.values()),
+    "Sacro Spinalis Longissimus Thoracis Pars Thoracis": list(
+        sacro_spinalis_longissimus_thoracis_pars_thoracis_l.values()
+    ),
+    "Sacro Spinalis Longissimus Thoracis Pars Lumbar": list(
+        sacro_spinalis_longissimus_thoracis_pars_lumbar_l.values()
+    ),
     "Multifidus Pelvis Region": list(multifidus_pelvis_region_l.values()),
     "Multifidus Neck Region": list(multifidus_neck_region_l.values()),
     "Multifidus Thoracic Region": list(multifidus_thoracic_region_l.values()),
@@ -574,17 +547,22 @@ thoracic_and_cervical_l_muscles = {
 
 
 tl_muscle_groups_level1 = {
-    "right core and abdominal muscles": list(chain.from_iterable(core_and_abdominal_r_muscles.values())),
-    "right back and spinal muscles": list(chain.from_iterable(back_and_spinal_r_muscles.values())),
-    "right hip and pelvic muscles": list(chain.from_iterable(hip_and_pelvic_r_muscles.values())),
-    "right neck muscles": list(chain.from_iterable(neck_r_muscles.values())),
-    "right thoracic and cervical muscles": list(chain.from_iterable(thoracic_and_cervical_r_muscles.values())),
-    "left core and abdominal muscles": list(chain.from_iterable(core_and_abdominal_l_muscles.values())),
-    "left back and spinal muscles": list(chain.from_iterable(back_and_spinal_l_muscles.values())),
-    "left hip and pelvic muscles": list(chain.from_iterable(hip_and_pelvic_l_muscles.values())),
-    "left neck muscles": list(chain.from_iterable(neck_l_muscles.values())),
-    "left thoracic and cervical muscles": list(chain.from_iterable(thoracic_and_cervical_l_muscles.values())),
+    "right core": list(chain.from_iterable(core_and_abdominal_r_muscles.values())),
+    "right lower back": list(chain.from_iterable(back_and_spinal_r_muscles.values())),
+    "right hip": list(chain.from_iterable(hip_and_pelvic_r_muscles.values())),
+    "right neck": list(chain.from_iterable(neck_r_muscles.values())),
+    "right upper back": list(
+        chain.from_iterable(thoracic_and_cervical_r_muscles.values())
+    ),
+    "left core": list(chain.from_iterable(core_and_abdominal_l_muscles.values())),
+    "left lower back": list(chain.from_iterable(back_and_spinal_l_muscles.values())),
+    "left hip": list(chain.from_iterable(hip_and_pelvic_l_muscles.values())),
+    "left neck": list(chain.from_iterable(neck_l_muscles.values())),
+    "left upper back": list(
+        chain.from_iterable(thoracic_and_cervical_l_muscles.values())
+    ),
 }
+
 
 class ThoracolumbarMuscleGroups:
     def __init__(self):

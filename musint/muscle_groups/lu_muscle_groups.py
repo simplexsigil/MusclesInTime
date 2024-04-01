@@ -70,7 +70,7 @@ tensor_fasciae_latae_r = {
 }
 
 piriformis_r = {
-    "Piriformis": "piri_r",
+    "Piriformis": "LU_piri_r",
 }
 
 sartorius_r = {
@@ -208,7 +208,7 @@ tensor_fasciae_latae_l = {
 }
 
 piriformis_l = {
-    "Piriformis": "piri_l",
+    "Piriformis": "LU_piri_l",
 }
 
 sartorius_l = {
