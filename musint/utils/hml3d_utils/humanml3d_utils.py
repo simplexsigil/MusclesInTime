@@ -343,10 +343,15 @@ def uniform_skeleton(positions, target_offset):
     return new_joints
 
 
-def generate_motion_representation(data_dir: str):
+def generate_motion_representation(data_dir: str, dataset: str):
     
     # if __name__ == "__main__":
-    example_id = "KIT/KIT/4/WalkInCounterClockwiseCircle06_poses_0"
+    if dataset == "train":
+        example_id = "KIT/KIT/4/WalkInCounterClockwiseCircle06_poses_0"
+    elif dataset == "val":
+        example_id = "KIT/KIT/4/WalkInCounterClockwiseCircle10_poses_0"
+    else:
+        example_id = "KIT/KIT/11/WalkInCounterClockwiseCircle10_poses_0"
     # Lower legs
     l_idx1, l_idx2 = 5, 8
     # Right/Left foot
@@ -373,7 +378,11 @@ def generate_motion_representation(data_dir: str):
 
 
     # Get offsets of target skeleton
-    example_data = np.load(os.path.join(data_dir, example_id + ".npy"))
+    try:
+        example_data = np.load(os.path.join(data_dir, example_id + ".npy"))
+    except FileNotFoundError:
+        print("Example data not found.")
+        return
     example_data = example_data.reshape(len(example_data), -1, 3)
     example_data = torch.from_numpy(example_data)
     tgt_skel = Skeleton(n_raw_offsets, kinematic_chain, "cpu")
@@ -522,7 +531,7 @@ def segment_motions(data_root: str, save_dir: str, csv_file: str, data, dataset=
         except Exception as e:
             print(f"Error processing {mint_data.data_path}: {e}")
         
-    generate_motion_representation(save_dir)
+    generate_motion_representation(save_dir, dataset)
 
 
 
@@ -532,7 +541,7 @@ def segment_data(
     segments_list,
     segments_list_m,
     segment_length=41,
-    overlap=20,
+    overlap=31,
 ):
     """
     Segment the data into segments of segment_length.

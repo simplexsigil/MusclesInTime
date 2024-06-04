@@ -64,7 +64,7 @@ def trim_mint_dataframe(
 def trim_mint_dataframe_v2(
     df: pd.DataFrame,
     time_window: Tuple[float, float],
-    target_frame_count=64,
+    target_frame_count=None,
     as_numpy=True,
 ):
     """
@@ -84,6 +84,9 @@ def trim_mint_dataframe_v2(
 
     filt_df = df[(df.index >= time_window[0]) & (df.index <= time_window[1])]
 
+    if target_frame_count is None:
+        return filt_df.values if as_numpy else filt_df
+
     # Create a grid of target time points
     grid = np.linspace(start=time_window[0], stop=time_window[1], num=target_frame_count)
 
@@ -94,7 +97,7 @@ def trim_mint_dataframe_v2(
     closest_indices = abs_diff_matrix.argmin(axis=0)
 
     # Select the closest rows based on the indices, ensuring each row is selected only once
-    unique_indices = np.unique(closest_indices)
+    unique_indices = closest_indices
     closest_rows = filt_df.iloc[unique_indices]
 
     return closest_rows.values if as_numpy else closest_rows

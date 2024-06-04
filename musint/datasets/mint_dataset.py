@@ -14,6 +14,7 @@ from musint.utils.dataframe_utils import (
     frame_to_time,
     time_to_frame,
     trim_mint_dataframe,
+    trim_mint_dataframe_v2,
 )
 from musint.utils.hml3d_utils.humanml3d_utils import segment_motions
 from musint.utils.metadata_utils import (
@@ -81,7 +82,7 @@ class MintData:
     def get_muscle_activations(
         self,
         time_window: Tuple[float, float] = None,
-        target_fps=20.0,
+        target_fps=20,
         rolling_average=False,
         target_frame_count=None,
         as_numpy=False,
@@ -100,11 +101,9 @@ class MintData:
         if time_window is None:
             time_window = (self.start_time, self.end_time)
 
-        return trim_mint_dataframe(
+        return trim_mint_dataframe_v2(
             self.muscle_activations,
             time_window,
-            target_fps,
-            rolling_average,
             target_frame_count,
             as_numpy,
         )
@@ -339,6 +338,19 @@ class MintDataset(data.Dataset):
             self.memorized_samples[path_id] = mint_data
 
         return mint_data
+    
+    def get_index_by_path_id(self, path_id: str):
+        """
+        Get the index of a sample by its path_id
+
+        Parameters:
+        path_id (str): The path_id of the sample
+
+        Returns:
+        int: The index of the sample
+        """
+        print(self.metadata.index)
+        return self.metadata.index.get_loc(path_id)
 
     @property
     def path_ids(self):
@@ -473,7 +485,7 @@ class MintDataset(data.Dataset):
         return self.by_path(sample_path)
 
     def generate_segment_data(
-        self, data_root: str, save_dir: str, csv_file: str, dataset=["val"]
+        self, data_root: str, save_dir: str, csv_file: str, dataset=["train", "val", "test"]
     ):
         """
         Generates segments of motion data and saves them as npy files in the save_dir from the pose_data of AMASS dataset.
@@ -489,8 +501,8 @@ class MintDataset(data.Dataset):
         """
         generator = torch.Generator()
         generator.manual_seed(0)
-        train_size = int(0.7 * len(self))
-        val_size = int(0.2 * len(self))
+        train_size = int(0.85 * len(self))
+        val_size = int(0.1 * len(self))
         test_size = len(self) - train_size - val_size
 
         train, val, test = random_split(
@@ -527,7 +539,8 @@ if __name__ == "__main__":
     parser.add_argument("--dataset_path", required=True)
 
     dataset_path = parser.parse_args().dataset_path
-    mint_dataset = MintDataset(dataset_path, use_cache=False)
+    mint_dataset = MintDataset(dataset_path, use_cache=True)
+    mint_data = mint_dataset.get_index_by_path_id("Subject_56_F_MoSh/Subject_56_F_3")
     sample_by_path = mint_dataset.by_path("TotalCapture/TotalCapture/s1/acting2_poses")
     print(sample_by_path)
     path_id = mint_dataset.path_ids[0]
@@ -536,3 +549,4 @@ if __name__ == "__main__":
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
     sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")[0]
     valid_indices = sample_by_humanml3d_name.get_valid_indices((10, 1000), 20.0)
+

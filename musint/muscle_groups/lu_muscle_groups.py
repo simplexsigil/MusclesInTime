@@ -499,6 +499,68 @@ invertor_l_muscles = {
     "Tibialis Posterior": list(tibialis_anterior_l.values()),
 }
 
+lu_muscle_groups_level0 = {
+    "left Extensor Hallucis Longus": list(extensor_hallucis_longus_l.values()),
+    "left Flexor Digitorum Longus": list(flexor_digitorum_longus_l.values()),
+    "left Flexor Hallucis Longus": list(flexor_hallucis_longus_l.values()),
+    "left Tibialis Anterior": list(tibialis_anterior_l.values()),
+    "left Tibialis Posterior": list(tibialis_anterior_l.values()),
+    "left Extensor Digitorum Longus": list(extensor_digitorum_longus_l.values()),
+    "left Peroneus": list(per_brev_l.values()) + list(per_long_l.values()),
+    "left Gastrocnemius": list(gastrocnemius_lateral_l.values()) + list(gastrocnemius_medial_l.values()),
+    "left Soleus": list(soleus_l.values()),
+    "left Rectus Femoris": list(recfem_l.values()),
+    "left Vastus Intermedius": list(vastus_intermedius_l.values()),
+    "left Vastus Lateralis": list(vastus_lateralis_l.values()),
+    "left Vastus Medialis": list(vastus_medialis_l.values()),
+    "left Biceps Femoris Long Head": list(biceps_femoris_long_head_l.values()),
+    "left Biceps Femoris Short Head": list(biceps_fermoris_short_head_l.values()),
+    "left Gracilis": list(gracilis_l.values()),
+    "left Sartorius": list(sartorius_l.values()),
+    "left Semitendinosus": list(semitendinosus_l.values()),
+    "left Semimembranosus": list(semimembranosus_l.values()),
+    "left Gluteus Minimus": list(gluteus_minimus_l.values()),
+    "left Piriformis": list(piriformis_l.values()),
+    "left Gluteus Medius": list(gluteus_medius_l.values()),
+    "left Iliacus": list(iliacus_l.values()),
+    "left Psoas": list(psoas_l.values()),
+    "left Tensor Fasciae Latae": list(tensor_fasciae_latae_l.values()),
+    "left Adductor Brevis": list(adductor_brevis_l.values()),
+    "left Adductor Longus": list(adductor_longus_l.values()),
+    "left Adductor Magnus": list(adductor_magnus_distal_l.values())+list(adductor_magnus_ischial_l.values())+list(adductor_magnus_mid_l.values())+list(adductor_magnus_proximal_l.values()),
+    "left Gluteus Maximus": list(gluteus_maximus_l.values()),
+
+    "right Extensor Hallucis Longus": list(extensor_hallucis_longus_r.values()),
+    "right Flexor Digitorum Longus": list(flexor_digitorum_longus_r.values()),
+    "right Flexor Hallucis Longus": list(flexor_hallucis_longus_r.values()),
+    "right Tibialis Anterior": list(tibialis_anterior_r.values()),
+    "right Tibialis Posterior": list(tibialis_anterior_r.values()),
+    "right Extensor Digitorum Longus": list(extensor_digitorum_longus_r.values()),
+    "right Peroneus": list(per_brev_r.values()) + list(per_long_r.values()),
+    "right Gastrocnemius": list(gastrocnemius_lateral_r.values()) + list(gastrocnemius_medial_r.values()),
+    "right Soleus": list(soleus_r.values()),
+    "right Rectus Femoris": list(recfem_r.values()),
+    "right Vastus Intermedius": list(vastus_intermedius_r.values()),
+    "right Vastus Lateralis": list(vastus_lateralis_r.values()),
+    "right Vastus Medialis": list(vastus_medialis_r.values()),
+    "right Biceps Femoris Long Head": list(biceps_femoris_long_head_r.values()),
+    "right Biceps Femoris Short Head": list(biceps_fermoris_short_head_r.values()),
+    "right Gracilis": list(gracilis_r.values()),
+    "right Sartorius": list(sartorius_r.values()),
+    "right Semitendinosus": list(semitendinosus_r.values()),
+    "right Semimembranosus": list(semimembranosus_r.values()),
+    "right Gluteus Minimus": list(gluteus_minimus_r.values()),
+    "right Piriformis": list(piriformis_r.values()),
+    "right Gluteus Medius": list(gluteus_medius_r.values()),
+    "right Iliacus": list(iliacus_r.values()),
+    "right Psoas": list(psoas_r.values()),
+    "right Tensor Fasciae Latae": list(tensor_fasciae_latae_r.values()),
+    "right Adductor Brevis": list(adductor_brevis_r.values()),
+    "right Adductor Longus": list(adductor_longus_r.values()),
+    "right Adductor Magnus": list(adductor_magnus_distal_r.values()) + list(adductor_magnus_ischial_r.values()) + list(adductor_magnus_mid_r.values()) + list(adductor_magnus_proximal_r.values()),
+    "right Gluteus Maximus": list(gluteus_maximus_r.values()),
+}
+
 lu_muscle_groups_level1 = {
     "right invertor": list(chain.from_iterable(invertor_r_muscles.values())),
     "right evertor": list(chain.from_iterable(evertor_r_muscles.values())),
@@ -522,6 +584,7 @@ lu_muscle_groups_level1 = {
     "right hip flexion": list(chain.from_iterable(hip_flexion_r_muscles.values())),
     "right hip abduction": list(chain.from_iterable(hip_abduction_r_muscles.values())),
     "right hip adduction": list(chain.from_iterable(hip_adduction_r_muscles.values())),
+    
     "left invertor": list(chain.from_iterable(invertor_l_muscles.values())),
     "left evertor": list(chain.from_iterable(evertor_l_muscles.values())),
     "left ankle plantarflexion": list(
@@ -624,13 +687,16 @@ lu_muscle_groups_level4 = {
 
 class LowerBodyMuscleGroups:
     def __init__(self):
+        self.level0 = lu_muscle_groups_level0
         self.level1 = lu_muscle_groups_level1
         self.level2 = lu_muscle_groups_level2
         self.level3 = lu_muscle_groups_level3
         self.level4 = lu_muscle_groups_level4
 
     def get_muscle_group(self, level, group):
-        if level == 1:
+        if level == 0:
+            return self.level0[group]
+        elif level == 1:
             return self.level1[group]
         elif level == 2:
             return self.level2[group]
@@ -642,7 +708,9 @@ class LowerBodyMuscleGroups:
             return None
 
     def get_muscle_groups(self, level):
-        if level == 1:
+        if level == 0:
+            return self.level0
+        elif level == 1:
             return self.level1
         elif level == 2:
             return self.level2

@@ -513,7 +513,17 @@ class BabelData:
             List[Tuple[float, float, str]]: A list of tuples representing the actions of the clips.
                                              Each tuple contains the start time, end time, and action label.
         """
-        return self.clip_actions_in_range(time_point, time_point, encoded)
+        actions: List[str] = []
+        if isinstance(self.frame_ann, FrameAnn):
+            for label in self.frame_ann.labels:
+                if label.start_t is not None and label.end_t is not None:
+                    if label.start_t <= time_point <= label.end_t:
+                        act_cat = [babel_action_cats_encode[a] for a in label.act_cat] if encoded else label.act_cat
+                        actions.extend(act_cat)
+        else:
+            actions.extend(self.sequence_actions())
+
+        return actions
 
     def clip_actions(self, encoded=False) -> List[Tuple[float, float, str]]:
         """
@@ -625,10 +635,10 @@ class BabelData:
         seq_ann_data = data.get("seq_ann", data.get("seq_anns", {}))
 
         if isinstance(seq_ann_data, list):
-            if len(seq_ann_data) > 1:
-                print(
-                    f"Sequence annotations are ambiguous. Choosing first annotation. Split: {split}, babel_sid {babel_sid}, len(seq_ann_data): {len(seq_ann_data)}"
-                )
+            # if len(seq_ann_data) > 1:
+                # print(
+                #     f"Sequence annotations are ambiguous. Choosing first annotation. Split: {split}, babel_sid {babel_sid}, len(seq_ann_data): {len(seq_ann_data)}"
+                # )
             seq_ann_data = seq_ann_data[0]
 
         seq_ann = SeqAnn(

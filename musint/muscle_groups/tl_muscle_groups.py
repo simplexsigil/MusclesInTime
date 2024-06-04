@@ -511,25 +511,25 @@ hip_and_pelvic_l_muscles = {
     "Quadratus Lumborum Posterior": list(quadratus_lumborum_l.values()),
 }
 
-neck_l_muscles = {
-    "Sternocleidomastoid": list(sternocleidomastoideus_r.values()),
-    "Scalenus": list(scalenus_r.values()),
-    "Longus Colli": list(longus_colli_r.values()),
-    "Splenius Capitis": list(splenius_capitis_r.values()),
-    "Splenius Cervicis": list(splenius_cervicis_r.values()),
-    "Levator Scapulae": list(levator_scapulae_r.values()),
-    "Semispinalis Capitis": list(semispinalis_capitis_r.values()),
-}
+# neck_l_muscles = {
+#     "Sternocleidomastoid": list(sternocleidomastoideus_r.values()),
+#     "Scalenus": list(scalenus_r.values()),
+#     "Longus Colli": list(longus_colli_r.values()),
+#     "Splenius Capitis": list(splenius_capitis_r.values()),
+#     "Splenius Cervicis": list(splenius_cervicis_r.values()),
+#     "Levator Scapulae": list(levator_scapulae_r.values()),
+#     "Semispinalis Capitis": list(semispinalis_capitis_r.values()),
+# }
 
-neck_r_muscles = {
-    "Sternocleidomastoid": list(sternocleidomastoideus_l.values()),
-    "Scalenus": list(scalenus_l.values()),
-    "Longus Colli": list(longus_colli_l.values()),
-    "Splenius Capitis": list(splenius_capitis_l.values()),
-    "Splenius Cervicis": list(splenius_cervicis_l.values()),
-    "Levator Scapulae": list(levator_scapulae_l.values()),
-    "Semispinalis Capitis": list(semispinalis_capitis_l.values()),
-}
+# neck_r_muscles = {
+#     "Sternocleidomastoid": list(sternocleidomastoideus_l.values()),
+#     "Scalenus": list(scalenus_l.values()),
+#     "Longus Colli": list(longus_colli_l.values()),
+#     "Splenius Capitis": list(splenius_capitis_l.values()),
+#     "Splenius Cervicis": list(splenius_cervicis_l.values()),
+#     "Levator Scapulae": list(levator_scapulae_l.values()),
+#     "Semispinalis Capitis": list(semispinalis_capitis_l.values()),
+# }
 
 thoracic_and_cervical_r_muscles = {
     "Longissimus Cervicis": list(longissi_cervicis_r.values()),
@@ -546,42 +546,247 @@ thoracic_and_cervical_l_muscles = {
 }
 
 
-tl_muscle_groups_level1 = {
-    "right core": list(chain.from_iterable(core_and_abdominal_r_muscles.values())),
-    "right lower back": list(chain.from_iterable(back_and_spinal_r_muscles.values())),
-    "right hip": list(chain.from_iterable(hip_and_pelvic_r_muscles.values())),
-    "right neck": list(chain.from_iterable(neck_r_muscles.values())),
-    "right upper back": list(
-        chain.from_iterable(thoracic_and_cervical_r_muscles.values())
+cervical_extensor_r_muscles = {
+    "right Semispinalis Capitis": list(semispinalis_capitis_r.values()),
+    "right Splenius Capitis": list(splenius_capitis_r.values()),
+}
+
+cervical_r_rotator_muscles = {
+    "right Sternocleidomastoid": list(sternocleidomastoideus_r.values()),
+    "right Scalenus": list(scalenus_r.values()),
+}
+
+neck_stabilizer_r_muscles = {
+    "right Longus Colli": list(longus_colli_r.values()),
+    "right Splenius Cervicis": list(splenius_cervicis_r.values()),
+    "right Semispinalis Cervicis": list(semispinalis_cervicis_r.values()),
+    "right Longissimus Cervicis": list(longissi_cervicis_r.values()),
+    "right Multifidus Neck Region": list(multifidus_neck_region_r.values()),
+}
+
+spinal_extensor_r_muscles = {
+    "right Sacro Spinalis Iliocostalis": list(sacro_spinalis_iliocostalis_r.values()),
+    "right Sacro Spinalis Longissimus Thoracis Pars Thoracis": list(
+        sacro_spinalis_longissimus_thoracis_pars_thoracis_r.values()
     ),
-    "left core": list(chain.from_iterable(core_and_abdominal_l_muscles.values())),
-    "left lower back": list(chain.from_iterable(back_and_spinal_l_muscles.values())),
-    "left hip": list(chain.from_iterable(hip_and_pelvic_l_muscles.values())),
+    "right Sacro Spinalis Longissimus Thoracis Pars Lumbar": list(
+        sacro_spinalis_longissimus_thoracis_pars_lumbar_r.values()
+    ),
+    "right Multifidus Thoracic Region": list(multifidus_thoracic_region_r.values()),
+    "right Multifiudus Pelvis Region": list(multifidus_pelvis_region_r.values()),
+}
+
+lateral_stabilizer_r_muscles = {
+    "right Quadratus Lumborum Posterior": list(quadratus_lumborum_r.values()),
+    "right Iliocostalis Cervicis": list(iliocostalis_cervicis_r.values()),
+}
+
+core_stabilizer_r_muscles = {
+    "right Rectus Abdominis": list(rectus_abdominis_r.values()),
+    "right External Oblique": list(external_oblique_r.values()),
+    "right Internal Oblique": list(internal_oblique_r.values()),
+    "right Transversus Abdominus": list(transversus_abdominus_r.values()),
+}
+
+cervical_extensor_l_muscles = {
+    "left Semispinalis Capitis": list(semispinalis_capitis_l.values()),
+    "left Splenius Capitis": list(splenius_capitis_l.values()),
+}
+
+cervical_l_rotator_muscles = {
+    "left Sternocleidomastoid": list(sternocleidomastoideus_l.values()),
+    "left Scalenus": list(scalenus_l.values()),
+}
+
+neck_stabilizer_l_muscles = {
+    "left Longus Colli": list(longus_colli_l.values()),
+    "left Splenius Cervicis": list(splenius_cervicis_l.values()),
+    "left Semispinalis Cervicis": list(semispinalis_cervicis_l.values()),
+    "left Longissimus Cervicis": list(longissi_cervicis_l.values()),
+    "left Multifidus Neck Region": list(multifidus_neck_region_l.values()),
+}
+
+spinal_extensor_l_muscles = {
+    "left Sacro Spinalis Iliocostalis": list(sacro_spinalis_iliocostalis_l.values()),
+    "left Sacro Spinalis Longissimus Thoracis Pars Thoracis": list(
+        sacro_spinalis_longissimus_thoracis_pars_thoracis_l.values()
+    ),
+    "left Sacro Spinalis Longissimus Thoracis Pars Lumbar": list(
+        sacro_spinalis_longissimus_thoracis_pars_lumbar_l.values()
+    ),
+    "left Multifidus Thoracic Region": list(multifidus_thoracic_region_l.values()),
+    "left Multifiudus Pelvis Region": list(multifidus_pelvis_region_l.values()),
+}
+
+lateral_stabilizer_l_muscles = {
+    "left Quadratus Lumborum Posterior": list(quadratus_lumborum_l.values()),
+    "left Iliocostalis Cervicis": list(iliocostalis_cervicis_l.values()),
+}
+
+core_stabilizer_l_muscles = {
+    "left Rectus Abdominis": list(rectus_abdominis_l.values()),
+    "left External Oblique": list(external_oblique_l.values()),
+    "left Internal Oblique": list(internal_oblique_l.values()),
+    "left Transversus Abdominus": list(transversus_abdominus_l.values()),
+}
+
+lower_back_l_muscles = {
+    "left Psoas": list(psoas_l.values()),
+    "left Quadratus Lumborum": list(quadratus_lumborum_l.values()),
+    "left Iliocostalis Lumborum": list(sacro_spinalis_iliocostalis_l.values()),
+    "left Longissimus Lumborum": list(sacro_spinalis_longissimus_thoracis_pars_lumbar_l.values()),
+    "left Lumbar Multifidus": list(multifidus_pelvis_region_l.values()),
+}
+
+lower_back_r_muscles = {
+    "right Psoas": list(psoas_r.values()),
+    "right Quadratus Lumborum": list(quadratus_lumborum_r.values()),
+    "right Iliocostalis Lumborum": list(sacro_spinalis_iliocostalis_r.values()),
+    "right Longissimus Lumborum": list(sacro_spinalis_longissimus_thoracis_pars_lumbar_r.values()),
+    "right Lumbar Multifidus": list(multifidus_pelvis_region_r.values()),
+}
+
+neck_l_muscles = {
+    "left Longissimus Cervicis": list(longissi_cervicis_l.values()),
+    "left Iliocostalis Cervicis": list(iliocostalis_cervicis_l.values()),
+    "left Semispinalis Cervicis": list(semispinalis_cervicis_l.values()),
+    "left Splenius Cervicis": list(splenius_cervicis_l.values()),
+    "left Sternocleidomastoid": list(sternocleidomastoideus_l.values()),
+    "left Scalenus": list(scalenus_l.values()),
+    "left Longus Colli": list(longus_colli_l.values()),
+}
+
+neck_r_muscles = {
+    "right Longissimus Cervicis": list(longissi_cervicis_r.values()),
+    "right Iliocostalis Cervicis": list(iliocostalis_cervicis_r.values()),
+    "right Semispinalis Cervicis": list(semispinalis_cervicis_r.values()),
+    "right Splenius Cervicis": list(splenius_cervicis_r.values()),
+    "right Sternocleidomastoid": list(sternocleidomastoideus_r.values()),
+    "right Scalenus": list(scalenus_r.values()),
+    "right Longus Colli": list(longus_colli_r.values()),
+}
+
+upper_back_l_muscles = {
+    "left Levator Scapulae": list(levator_scapulae_l.values()),
+    "left Semispinalis Capitis": list(semispinalis_capitis_l.values()),
+    "left Splenius Capitis": list(splenius_capitis_l.values()),
+    "left Longissimus Thoracis": list(sacro_spinalis_longissimus_thoracis_pars_thoracis_l.values()),
+    "left Thoracic Multifidus": list(multifidus_thoracic_region_l.values()),
+}
+
+upper_back_r_muscles = {
+    "right Levator Scapulae": list(levator_scapulae_r.values()),
+    "right Semispinalis Capitis": list(semispinalis_capitis_r.values()),
+    "right Splenius Capitis": list(splenius_capitis_r.values()),
+    "right Longissimus Thoracis": list(sacro_spinalis_longissimus_thoracis_pars_thoracis_r.values()),
+    "right Thoracic Multifidus": list(multifidus_thoracic_region_r.values()),
+}
+
+abdominals_r_muscles = {
+    "right Rectus Abdominis": list(rectus_abdominis_r.values()),
+    "right External Oblique": list(external_oblique_r.values()),
+    "right Internal Oblique": list(internal_oblique_r.values()),
+    "right Transversus Abdominus": list(transversus_abdominus_r.values()),
+}
+
+abdominals_l_muscles = {
+    "left Rectus Abdominis": list(rectus_abdominis_l.values()),
+    "left External Oblique": list(external_oblique_l.values()),
+    "left Internal Oblique": list(internal_oblique_l.values()),
+    "left Transversus Abdominus": list(transversus_abdominus_l.values()),
+}
+
+tl_muscle_groups_level0 = {
+    "left Longissimus Cervicis": list(longissi_cervicis_l.values()),
+    "left Iliocostalis Cervicis": list(iliocostalis_cervicis_l.values()),
+    "left Semispinalis Cervicis": list(semispinalis_cervicis_l.values()),
+    "left Splenius Cervicis": list(splenius_cervicis_l.values()),
+    "left Sternocleidomastoid": list(sternocleidomastoideus_l.values()),
+    "left Scalenus": list(scalenus_l.values()),
+    "left Longus Colli": list(longus_colli_l.values()),
+    "left Splenius Capitis": list(splenius_capitis_l.values()),
+    "left Levator Scapulae": list(levator_scapulae_l.values()),
+    "left Semispinalis Capitis": list(semispinalis_capitis_l.values()),
+    "left Psoas": list(psoas_l.values()),
+    "left Quadratus Lumborum": list(quadratus_lumborum_l.values()),
+    "left Iliocostalis Lumborum": list(sacro_spinalis_iliocostalis_l.values()),
+    "left Longissimus Thoracis": list(sacro_spinalis_longissimus_thoracis_pars_thoracis_l.values()),
+    "left Longissimus Lumborum": list(sacro_spinalis_longissimus_thoracis_pars_lumbar_l.values()),
+    "left Lumbar Multifidus": list(multifidus_pelvis_region_l.values()),
+    "left Cervical Multifidus": list(multifidus_neck_region_l.values()),
+    "left Thoracic Multifidus": list(multifidus_thoracic_region_l.values()),
+    "left Rectus Abdominis": list(rectus_abdominis_l.values()),
+    "left External Oblique": list(external_oblique_l.values()),
+    "left Internal Oblique": list(internal_oblique_l.values()),
+    "left Transversus Abdominus": list(transversus_abdominus_l.values()),
+
+    "right Longissimus Cervicis": list(longissi_cervicis_r.values()),
+    "right Iliocostalis Cervicis": list(iliocostalis_cervicis_r.values()),
+    "right Semispinalis Cervicis": list(semispinalis_cervicis_r.values()),
+    "right Splenius Cervicis": list(splenius_cervicis_r.values()),
+    "right Sternocleidomastoid": list(sternocleidomastoideus_r.values()),
+    "right Scalenus": list(scalenus_r.values()),
+    "right Longus Colli": list(longus_colli_r.values()),
+    "right Splenius Capitis": list(splenius_capitis_r.values()),
+    "right Levator Scapulae": list(levator_scapulae_r.values()),
+    "right Semispinalis Capitis": list(semispinalis_capitis_r.values()),
+    "right Psoas": list(psoas_r.values()),
+    "right Quadratus Lumborum": list(quadratus_lumborum_r.values()),
+    "right Iliocostalis Lumborum": list(sacro_spinalis_iliocostalis_r.values()),
+    "right Longissimus Thoracis": list(sacro_spinalis_longissimus_thoracis_pars_thoracis_r.values()),
+    "right Longissimus Lumborum": list(sacro_spinalis_longissimus_thoracis_pars_lumbar_r.values()),
+    "right Lumbar Multifidus": list(multifidus_pelvis_region_r.values()),
+    "right Cervical Multifidus": list(multifidus_neck_region_r.values()),
+    "right Thoracic Multifidus": list(multifidus_thoracic_region_r.values()),
+    "right Rectus Abdominis": list(rectus_abdominis_r.values()),
+    "right External Oblique": list(external_oblique_r.values()),
+    "right Internal Oblique": list(internal_oblique_r.values()),
+    "right Transversus Abdominus": list(transversus_abdominus_r.values()),
+}
+
+
+tl_muscle_groups_level2 = {
+    "left lower back": list(chain.from_iterable(lower_back_l_muscles.values())),
+    "right lower back": list(chain.from_iterable(lower_back_r_muscles.values())),
     "left neck": list(chain.from_iterable(neck_l_muscles.values())),
-    "left upper back": list(
-        chain.from_iterable(thoracic_and_cervical_l_muscles.values())
-    ),
+    "right neck": list(chain.from_iterable(neck_r_muscles.values())),
+    "left upper back": list(chain.from_iterable(upper_back_l_muscles.values())),
+    "right upper back": list(chain.from_iterable(upper_back_r_muscles.values())),
+    "left abdominals": list(chain.from_iterable(abdominals_l_muscles.values())),
+    "right abdominals": list(chain.from_iterable(abdominals_r_muscles.values())),
+}
+
+tl_muscle_groups_level3 = {
+    "lower back": list(chain.from_iterable(lower_back_l_muscles.values())) + list(chain.from_iterable(lower_back_r_muscles.values())),
+    "neck": list(chain.from_iterable(neck_l_muscles.values())) + list(chain.from_iterable(neck_r_muscles.values())),
+    "upper back": list(chain.from_iterable(upper_back_l_muscles.values())) + list(chain.from_iterable(upper_back_r_muscles.values())),
+    "abdominals": list(chain.from_iterable(abdominals_l_muscles.values())) + list(chain.from_iterable(abdominals_r_muscles.values())),
 }
 
 
 class ThoracolumbarMuscleGroups:
     def __init__(self):
-        self.level1 = tl_muscle_groups_level1
+        self.level0 = tl_muscle_groups_level0
+        self.level2 = tl_muscle_groups_level2
 
     def get_muscle_group(self, level, group):
-        if level == 1:
-            return self.level1[group]
+        if level == 0:
+            return self.level0[group]
+        elif level == 2:
+            return self.level2[group]
         else:
             return None
 
     def get_muscle_groups(self, level):
-        if level == 1:
-            return self.level1
+        if level == 0:
+            return self.level0
+        elif level == 2:
+            return self.level2
         else:
             return None
         
 
 if __name__ == "__main__":
     tl_muscle_groups = ThoracolumbarMuscleGroups()
-    print(tl_muscle_groups.get_muscle_group(1, "right core and abdominal muscles"))
-    print(tl_muscle_groups.get_muscle_groups(1))
+    print(tl_muscle_groups.get_muscle_group(2, "right core and abdominal muscles"))
+    print(tl_muscle_groups.get_muscle_groups(2))
