@@ -1,0 +1,33 @@
+# pyproject.toml
+
+[build-system]
+requires      = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "musint"
+version = "0.3.0"
+description = "Package for structured access to the Muscles in Time dataset."
+readme = "README.md"
+authors = [{ name = "David Schneider", email = "david.schneider@kit.edu" }, { name = "Marco Kugler" }]
+license = { file = "LICENSE" }
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+]
+keywords = ["Muscle Activation", "MinT", "Muscles in Time", "Dataset"]
+dependencies = [
+    "numpy",
+    "pandas",
+    "torch",
+    "scipy",
+    "tqdm"
+]
+requires-python = ">=3.6"
+
+[project.urls]
+Homepage = "https://github.com/simplexsigil/MusclesInTime.git"
+
+[tool.setuptools.packages.find]
+include = ["musint"]
