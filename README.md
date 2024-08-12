@@ -2,6 +2,8 @@
 
 The `musint` package in this repository is a Python toolset for the Muscles in Time (MinT) dataset, a large-scale synthetic muscle activation dataset derived from biomechanically accurate OpenSim simulations. This dataset bridges surface-level motion data with the underlying muscle activations.
 
+A link for downloading the required underlying MinT data will be made available in the future.
+
 The MinT dataset offers over 9 hours of simulated muscle activation data, covering 227 subjects and 402 muscle strands. 
 It is built by performing OpenSim simulation on the following motion capture datasets:
 - [BML-MoVi and BML-RUB](https://www.biomotionlab.ca/movi/)
@@ -21,7 +23,7 @@ For the generation of MinT we made use of AMASS by placing virtual markers on th
 
 2. **Multi-modality and cross-dataset compatibility**:
    - The dataset is designed to be compatible with the motion capture dataset AMASS and its accompanying textual description dataset BABEL.
-   - This enhances the usability of the dataset for multi-modality research projects, allowing for more extensive and varied analyses.
+   - This enhances the usability of the dataset for multi-modality research projects.
 
 3. **Preprocessing Utilities**:
    - The project provides tools for segmenting data, handling missing values, and converting between different time frames and frame frequencies.
@@ -279,7 +281,7 @@ def trim_mint_dataframe_v2(
 ):
 ```
 
-- **Purpose**: Trims and resamples a DataFrame from the MinT dataset to a specified time window and frame count. Optionally returns the result as a NumPy array. Vectorized version of this function for faster computation. Note, that fps is implicit by setting tim_window and target_frame_count accordingly.
+- **Purpose**: Trims and resamples a DataFrame from the MinT dataset to a specified time window and frame count. Optionally returns the result as a NumPy array. Vectorized version of this function for faster computation. Note, that fps is implicit by setting time_window and target_frame_count accordingly.
 - **Parameters**:
   - `df` (pd.DataFrame): Input DataFrame containing muscle activation data from the MinT dataset.
   - `time_window` (Tuple[float, float]): Tuple specifying the start and end times of the desired time window.
