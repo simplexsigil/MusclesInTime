@@ -1,8 +1,17 @@
 # Muscles in Time (MinT) Dataset
 
-The `musint` package in this repository is a Python toolset for the Muscles in Time (MinT) dataset, a large-scale synthetic muscle activation dataset derived from biomechanically accurate OpenSim simulations. This dataset advances human motion research by bridging surface-level motion data with the underlying muscle activations.
+The `musint` package in this repository is a Python toolset for the Muscles in Time (MinT) dataset, a large-scale synthetic muscle activation dataset derived from biomechanically accurate OpenSim simulations. This dataset bridges surface-level motion data with the underlying muscle activations.
 
-The MinT dataset offers over 9 hours of simulated muscle activation data, covering 227 subjects and 402 muscle strands. Built on existing motion capture datasets, it is invaluable for exploring human motion dynamics and training neural networks in biomechanical and computer vision research.
+The MinT dataset offers over 9 hours of simulated muscle activation data, covering 227 subjects and 402 muscle strands. 
+It is built by performing OpenSim simulation on the following motion capture datasets:
+- [BML-MoVi and BML-RUB](https://www.biomotionlab.ca/movi/)
+- [KIT Whole-Body Human Motion Database](https://motion-database.humanoids.kit.edu/)
+- [EyesJapan Dataset](http://mocapdata.com/Terms_of_Use.html)
+- [Total Capture](https://cvssp.org/data/totalcapture/)
+
+For the generation of MinT we made use of AMASS by placing virtual markers on the SMPL body model in order to use them as cross-dataset normalized input markers for OpenSim.
+
+- [AMASS](https://amass.is.tue.mpg.de/index.html)
 
 ### Key Features
 
