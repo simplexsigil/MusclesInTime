@@ -1,36 +1,51 @@
+MIA_MUSCLES = [
+    "quadriceps_femoris_r",
+    "hamstring_r",
+    "lateral_r",
+    "biceps_r",
+    "quadriceps_femoris_l",
+    "hamstring_l",
+    "lateral_l",
+    "biceps_l",
+]
+
+MIA_TO_MUSINT = {
+    "quadriceps_femoris_r": "LU_recfem_r",
+    "hamstring_r": "LU_bflh_r",
+    "quadriceps_femoris_l": "LU_recfem_l",
+    "hamstring_l": "LU_bflh_l",
+}
+
 MUSCLE_SUBSETS = {
     # Major lower body muscles from the Lai Arnold body model.
-    "LAI_ARNOLD_LOWER_BODY_8": 
-    [
-    "LU_glmed1_l",
-    "LU_glmax2_l",
-    "LU_recfem_l",
-    "LU_bflh_l",
-    "LU_glmed1_r",
-    "LU_glmax2_r",
-    "LU_recfem_r",
-    "LU_bflh_r",
+    "LAI_ARNOLD_LOWER_BODY_8": [
+        "LU_glmed1_l",
+        "LU_glmax2_l",
+        "LU_recfem_l",
+        "LU_bflh_l",
+        "LU_glmed1_r",
+        "LU_glmax2_r",
+        "LU_recfem_r",
+        "LU_bflh_r",
     ],
-    "LAI_ARNOLD_LOWER_BODY_16": 
-    [
-    "LU_glmed1_l",
-    "LU_addmagIsch_l",
-    "LU_glmax2_l",
-    "LU_iliacus_l",
-    "LU_recfem_l",
-    "LU_bflh_l",
-    "LU_gasmed_l",
-    "LU_tibant_l",
-    "LU_glmed1_r",
-    "LU_addmagIsch_r",
-    "LU_glmax2_r",
-    "LU_iliacus_r",
-    "LU_recfem_r",
-    "LU_bflh_r",
-    "LU_gasmed_r",
-    "LU_tibant_r"
+    "LAI_ARNOLD_LOWER_BODY_16": [
+        "LU_glmed1_l",
+        "LU_addmagIsch_l",
+        "LU_glmax2_l",
+        "LU_iliacus_l",
+        "LU_recfem_l",
+        "LU_bflh_l",
+        "LU_gasmed_l",
+        "LU_tibant_l",
+        "LU_glmed1_r",
+        "LU_addmagIsch_r",
+        "LU_glmax2_r",
+        "LU_iliacus_r",
+        "LU_recfem_r",
+        "LU_bflh_r",
+        "LU_gasmed_r",
+        "LU_tibant_r",
     ],
-
     "LU_MUSCLES": [
         "LU_addbrev_l",
         "LU_addlong_l",

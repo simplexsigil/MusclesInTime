@@ -45,25 +45,19 @@ class MintData:
         self.subject = sample["subject"]
         self.sequence = sample["sequence"]
         self.dataset = sample["dataset"]
-        self.subdataset_path = osp.join(
-            self.data_path.split("/")[0], self.data_path.split("/")[1]
-        )
+        self.subdataset_path = osp.join(self.data_path.split("/")[0], self.data_path.split("/")[1])
         self.gender = sample["gender"]
         self.analysed_dur = sample["analysed_dur"]
         self.analysed_percentage = sample["analysed_%"]
         self.has_gap = ast.literal_eval(sample["gap"])
         self.path_id = MintData.path_id_from_sample(sample)
 
-        self.muscle_activations = load_pkl_file(
-            self.dataset_path, self.data_path, "muscle_activations"
-        )
+        self.muscle_activations = load_pkl_file(self.dataset_path, self.data_path, "muscle_activations")
         self.grf = load_pkl_file(self.dataset_path, self.data_path, "grf")
         self.forces = load_pkl_file(self.dataset_path, self.data_path, "forces")
 
         if pyarrow:
-            self.muscle_activations = self.muscle_activations.convert_dtypes(
-                dtype_backend="pyarrow"
-            )
+            self.muscle_activations = self.muscle_activations.convert_dtypes(dtype_backend="pyarrow")
             self.grf = self.grf.convert_dtypes(dtype_backend="pyarrow")
             self.forces = self.forces.convert_dtypes(dtype_backend="pyarrow")
 
@@ -170,9 +164,7 @@ class MintData:
             as_numpy,
         )
 
-    def get_valid_indices(
-        self, time_window: Tuple[float, float] = None, target_fps=20.0, as_time=True
-    ):
+    def get_valid_indices(self, time_window: Tuple[float, float] = None, target_fps=20.0, as_time=True):
         """
         Gets the valid indices of the muscle activations given the frame indices.
         Returns the indices as frames or time corresponding to the target fps.
@@ -184,16 +176,10 @@ class MintData:
             time_window = (self.start_time, self.end_time)
 
         trimmed_muscle_activation_index = self.muscle_activations.index[
-            self.muscle_activations.index.to_series().between(
-                time_window[0], time_window[1]
-            )
+            self.muscle_activations.index.to_series().between(time_window[0], time_window[1])
         ]
 
-        frame_indices = (
-            np.round(trimmed_muscle_activation_index * target_fps, 0)
-            .astype(int)
-            .unique()
-        )
+        frame_indices = np.round(trimmed_muscle_activation_index * target_fps, 0).astype(int).unique()
 
         if as_time:
             frame_times = frame_indices / target_fps
@@ -207,9 +193,7 @@ class MintData:
         """
         # resample index of the muscle activations to fps
         muscle_activation_index = self.muscle_activations.index
-        muscle_activation_index = np.round(muscle_activation_index * self.fps).astype(
-            int
-        )
+        muscle_activation_index = np.round(muscle_activation_index * self.fps).astype(int)
 
         differences = pd.Series(muscle_activation_index).diff()
 
@@ -221,9 +205,7 @@ class MintData:
         for gap_index in gap_indices:
             pos2 = gap_index
             time = frame_to_time(gap_index, self.fps)
-            previous_frame = (
-                self.muscle_activations.index.get_loc(frame_to_time(pos2, self.fps)) - 1
-            )
+            previous_frame = self.muscle_activations.index.get_loc(frame_to_time(pos2, self.fps)) - 1
             previous_time = self.muscle_activations.index[previous_frame]
             if as_frame:
                 gap_tuples.append(
@@ -242,9 +224,7 @@ class MintData:
         Get the source path of the HumanML3D sample
         """
         dataset = self.data_path.split("/")[1]
-        source_path = osp.join(
-            data_root, "pose_data", dataset, self.subject, self.sequence + ".npy"
-        )
+        source_path = osp.join(data_root, "pose_data", dataset, self.subject, self.sequence + ".npy")
 
         return source_path
 
@@ -252,14 +232,10 @@ class MintData:
         """
         Get the humanml3d names of the sample
         """
-        csv_path = osp.join(
-            os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv"
-        )
+        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv")
         df = pd.read_csv(csv_path)
 
-        humanml3d_names = df[df["source_path"] == self.humanml3d_source_path][
-            "new_name"
-        ].values
+        humanml3d_names = df[df["source_path"] == self.humanml3d_source_path]["new_name"].values
 
         return humanml3d_names
 
@@ -306,10 +282,18 @@ class MintDataset(data.Dataset):
         pyarrow: bool = False,
         load_humanml3d_names: bool = True,
     ):
+        """
+        Initialize the MintDataset object.
+
+        Args:
+            dataset_path (str): The path to the dataset.
+            use_cache (bool, optional): Whether to use the cache. Defaults to True.
+            keep_in_memory (bool, optional): Whether to keep the dataset in memory. Defaults to False.
+            pyarrow (bool, optional): Whether to use PyArrow for serialization. Defaults to False.
+            load_humanml3d_names (bool, optional): Whether to load HumanML3D names. Defaults to True.
+        """
         self.dataset_path = dataset_path
-        self.metadata = concatenate_mint_metadata(
-            dataset_path, delete_old=not use_cache
-        )
+        self.metadata = concatenate_mint_metadata(dataset_path, delete_old=not use_cache)
         self.keep_in_memory = keep_in_memory
         self.memorized_samples = {}
         self.pyarrow = pyarrow
@@ -338,7 +322,7 @@ class MintDataset(data.Dataset):
             self.memorized_samples[path_id] = mint_data
 
         return mint_data
-    
+
     def get_index_by_path_id(self, path_id: str):
         """
         Get the index of a sample by its path_id
@@ -416,9 +400,7 @@ class MintDataset(data.Dataset):
         filtered = self.metadata[self.metadata["subject"] == subject]
         filtered = filtered[filtered["sequence"] == sequence]
         if filtered.empty:
-            raise ValueError(
-                f"No sample found with subject: {subject} and sequence: {sequence}"
-            )
+            raise ValueError(f"No sample found with subject: {subject} and sequence: {sequence}")
         idx = self.metadata.index.get_loc(filtered.index[0])
         return self[idx]
 
@@ -433,9 +415,7 @@ class MintDataset(data.Dataset):
         MintData: The sample
         (Tuple[float, float]): The start and end times of the sample if as_time is True else the start and end frames of the HumanML3D sample
         """
-        csv_path = osp.join(
-            os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv"
-        )
+        csv_path = osp.join(os.path.dirname(os.path.realpath(__file__)), "humanml3d_index.csv")
         df = pd.read_csv(csv_path)
 
         if not humanml3d_name.endswith(".npy"):
@@ -484,9 +464,7 @@ class MintDataset(data.Dataset):
         sample_path = os.path.join(dir_name, file_name)
         return self.by_path(sample_path)
 
-    def generate_segment_data(
-        self, data_root: str, save_dir: str, csv_file: str, dataset=["train", "val", "test"]
-    ):
+    def generate_segment_data(self, data_root: str, save_dir: str, csv_file: str, dataset=["train", "val", "test"]):
         """
         Generates segments of motion data and saves them as npy files in the save_dir from the pose_data of AMASS dataset.
         The motion data segments are generated based on the availability of the mint data.
@@ -505,9 +483,7 @@ class MintDataset(data.Dataset):
         val_size = int(0.1 * len(self))
         test_size = len(self) - train_size - val_size
 
-        train, val, test = random_split(
-            dataset=self, lengths=[train_size, val_size, test_size], generator=generator
-        )
+        train, val, test = random_split(dataset=self, lengths=[train_size, val_size, test_size], generator=generator)
 
         for dataset in dataset:
             if dataset == "train":
@@ -549,4 +525,3 @@ if __name__ == "__main__":
     sample_by_babel_sid = mint_dataset.by_babel_sid(12906)
     sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")[0]
     valid_indices = sample_by_humanml3d_name.get_valid_indices((10, 1000), 20.0)
-

@@ -1,4 +1,9 @@
+*.mp4
 .vscode
+
+notebooks/notebook_resources/
+notebooks/notebook_output/
+notebooks/body_models/
 
 # Byte-compiled / optimized / DLL files
 babel_dataset
