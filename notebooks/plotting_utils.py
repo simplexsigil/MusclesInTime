@@ -21,7 +21,7 @@ def visualize_pose(vertices, frame, ax, elev=20, azim=210, roll=0, vertical_axis
     ax.view_init(elev=elev, azim=azim, roll=roll, vertical_axis=vertical_axis)
 
 
-def plot_emg_data(vals, preds, names, fig=None, gridspec=None, ylim=1.3):
+def plot_emg_data(vals, preds, names, fig=None, gridspec=None, ylim=(0, 1.3), show_pred=True):
     sns.set_style(style="whitegrid")
 
     T, D = vals.shape
@@ -46,11 +46,12 @@ def plot_emg_data(vals, preds, names, fig=None, gridspec=None, ylim=1.3):
         axes[li].plot(gt_l, label=f"Left", linewidth=2, color="royalblue", alpha=0.6)
         axes[li].plot(gt_r, label=f"Right", linewidth=2, color="orange", alpha=0.6)
 
-        axes[li].plot(pred_l, label=f"Pred Left", linestyle="--", linewidth=2, color="royalblue")
-        axes[li].plot(pred_r, label=f"Pred Right", linestyle="--", linewidth=2, color="orange")
+        if show_pred:
+            axes[li].plot(pred_l, label=f"Pred Left", linestyle="--", linewidth=2, color="royalblue")
+            axes[li].plot(pred_r, label=f"Pred Right", linestyle="--", linewidth=2, color="orange")
 
-        axes[li].fill_between(range(len(gt_l)), gt_l, pred_l, color="skyblue", alpha=0.4)
-        axes[li].fill_between(range(len(gt_r)), gt_r, pred_r, color="orange", alpha=0.4)
+            axes[li].fill_between(range(len(gt_l)), gt_l, pred_l, color="skyblue", alpha=0.4)
+            axes[li].fill_between(range(len(gt_r)), gt_r, pred_r, color="orange", alpha=0.4)
 
         axes[li].set_yticks([0, 0.5, 1.0])
         axes[li].set_title(f"{muscle_name_l[:-4]}", rotation=-90, loc="right", x=1.05, y=0.3)
@@ -64,7 +65,10 @@ def plot_emg_data(vals, preds, names, fig=None, gridspec=None, ylim=1.3):
 
         lines.append(axes[li].axvline(x=0, color="r"))
 
-        axes[li].set_ylim((0, ylim))
+        if ylim is not None:
+            axes[li].set_ylim(ylim)
+        else:
+            axes[li].set_ylim((min(gt_l.min(), gt_r.min()), max(gt_l.max(), gt_r.max())))
         axes[li].grid(True)
 
     axes[0].legend(loc="upper right", ncol=2, frameon=False, bbox_to_anchor=(1, 1.5), handletextpad=2)

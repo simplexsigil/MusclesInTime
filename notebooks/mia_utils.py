@@ -128,21 +128,23 @@ def load_emg_data(file_list):
             return None
         return torch.tensor(data)
 
-    data_list = []  # Create an empty list to hold data arrays from each file.
+    data_list = [None] * len(file_list)  # Pre-allocate list with the same length as file_list.
 
     with ThreadPoolExecutor() as executor:
-        futures = {executor.submit(process_file, file): file for file in file_list}
+        futures = {executor.submit(process_file, file): i for i, file in enumerate(file_list)}
         for future in tqdm(as_completed(futures), total=len(futures)):
             result = future.result()
             if result is not None:
-                data_list.append(result)
+                data_list[futures[future]] = result
+
+    assert len(data_list) == len(file_list), "Data list and file list should have the same length."
 
     data_list = torch.stack(data_list, axis=0)
 
     return data_list
 
 
-def mia_to_smpl_body(pose_dir, bm):
+def mia_to_smpl_body(pose_dir, bm, interp=True):
     pose_np = np.load(opj(pose_dir, "pose.npy"))
     betas_np = np.load(opj(pose_dir, "betas.npy"))
     predcam_np = np.load(opj(pose_dir, "predcam.npy"))
@@ -169,10 +171,15 @@ def mia_to_smpl_body(pose_dir, bm):
     # So we can set the z translation to 0
     transl_np[:, 2] /= 20
 
-    # Interpolate in bnetween to get 59 pose samples (20 fps instead of 10 fps)
-    pose_np_inter = interpolate_batch(pose_np, interpolate_poses, n_interpolations=1)
-    betas_np_inter = interpolate_batch(betas_np, interpolate_linear, n_interpolations=1)
-    transl_np_inter = interpolate_batch(transl_np, interpolate_linear, n_interpolations=1)
+    # Interpolate in between to get 59 pose samples (20 fps instead of 10 fps)
+    if interp:
+        pose_np_inter = interpolate_batch(pose_np, interpolate_poses, n_interpolations=1)
+        betas_np_inter = interpolate_batch(betas_np, interpolate_linear, n_interpolations=1)
+        transl_np_inter = interpolate_batch(transl_np, interpolate_linear, n_interpolations=1)
+    else:
+        pose_np_inter = pose_np
+        betas_np_inter = betas_np
+        transl_np_inter = transl_np
 
     # Ensure the shapes are correct for the SMPL model
     assert pose_np.shape[1] == 72, "Each pose should have 72 parameters (24 joints * 3 rotations)."
@@ -214,13 +221,13 @@ def mia_to_smpl_body(pose_dir, bm):
         left_hand_pose=left_hand_pose,
         right_hand_pose=right_hand_pose,
         global_orient=new_orientation,
-        transl=transl_tensor,
+        transl=-transl_tensor,
     )
 
     return body
 
 
-def load_and_concat_mia_dat(preds_path, metadata, preds_root, pad=-1):
+def load_and_concat_mia_dat(preds_path, metadata, preds_root, pad=-1, pad_val=None):
     gts = []
     preds = []
 
@@ -243,8 +250,7 @@ def load_and_concat_mia_dat(preds_path, metadata, preds_root, pad=-1):
         except:
             return None, None, None
 
-
-        while (start_time * 20 - last_start_frame > 28):
+        while start_time * 20 - last_start_frame > 28:
             if last_start_frame == -1 and start_time * 20 > 0:  # Special case: missing first block
                 gts.append(np.zeros((28, gt.shape[-1])))
                 preds.append(np.zeros((28, pred.shape[-1])))
@@ -263,13 +269,20 @@ def load_and_concat_mia_dat(preds_path, metadata, preds_root, pad=-1):
 
     gts = np.concatenate(gts, axis=0)
     T = gts.shape[0]
+
     if T < pad:
-        gts = np.pad(gts, ((0, pad - T), (0, 0)), mode="constant", constant_values=0)
+        if pad_val is None:
+            gts = np.pad(gts, ((0, pad - T), (0, 0)), mode="edge")
+        else:
+            gts = np.pad(gts, ((0, pad - T), (0, 0)), mode="constant", constant_values=pad_val)
 
     preds = np.concatenate(preds, axis=0)
-    T = preds.shape[0]
 
+    T = preds.shape[0]
     if T < pad:
-        preds = np.pad(preds, ((0, pad - T), (0, 0)), mode="constant", constant_values=0)
+        if pad_val is None:
+            preds = np.pad(preds, ((0, pad - T), (0, 0)), mode="edge")
+        else:
+            preds = np.pad(preds, ((0, pad - T), (0, 0)), mode="constant", constant_values=pad_val)
 
     return gts, preds, int(start_times[0] * 20), int(start_times[-1] * 20 + 28)
