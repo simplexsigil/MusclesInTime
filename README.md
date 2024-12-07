@@ -2,7 +2,18 @@
 
 The `musint` package in this repository is a Python toolset for the Muscles in Time (MinT) dataset, a large-scale synthetic muscle activation dataset derived from biomechanically accurate OpenSim simulations. This dataset bridges surface-level motion data with the underlying muscle activations.
 
-A link for downloading the required underlying MinT data will be made available in the future.
+For more information also have a look at our website:
+  - [Muscles in Time Data](https://simplexsigil.github.io/mint)
+
+The actual data can be downloaded from here:
+ - [Muscles in Time Data](https://radar.kit.edu/radar/en/dataset/VDPCEFSThBWlDPFL.Muscles%2BTime)
+
+Note that the data release server zips additional metadata together with the compressed MinT dataset which means you have to extract this outer container first. The actual compressed MinT data can be found within under:
+`10.35097-VDPCEFSThBWlDPFL\10.35097-VDPCEFSThBWlDPFL\data\dataset\MinT.tar.zst`
+
+It requires Zstandard for decompression. Modern versions of `tar` should support it out-of-the-box, for older versions you might have to install `zstd` and pass it to tar via the `-I zstd` option.
+
+We also performed some analysis, checking various metrics to get a better understanding of simulation quality. This data is provided both in human readable (text log file and pdf) and machine readable form (pickle file) as metadata. Please have a look at our website to find the link to that metadata. It is not required to use MinT, unless you want to filter samples based on these quality metrics.
 
 The MinT dataset offers over 9 hours of simulated muscle activation data, covering 227 subjects and 402 muscle strands. 
 It is built by performing OpenSim simulation on the following motion capture datasets:
