@@ -3,7 +3,7 @@
 The `musint` package in this repository is a Python toolset for the Muscles in Time (MinT) dataset, a large-scale synthetic muscle activation dataset derived from biomechanically accurate OpenSim simulations. This dataset bridges surface-level motion data with the underlying muscle activations.
 
 For more information also have a look at our website:
-  - [Muscles in Time Data](https://simplexsigil.github.io/mint)
+  - [Muscles in Time Website](https://simplexsigil.github.io/mint)
 
 The actual data can be downloaded from here:
  - [Muscles in Time Data](https://radar.kit.edu/radar/en/dataset/VDPCEFSThBWlDPFL.Muscles%2BTime)
