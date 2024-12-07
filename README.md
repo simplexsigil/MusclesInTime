@@ -6,7 +6,7 @@ For more information also have a look at our website:
   - [Muscles in Time Website](https://simplexsigil.github.io/mint)
 
 The actual data can be downloaded from here:
- - [Muscles in Time Data](https://radar.kit.edu/radar/en/dataset/VDPCEFSThBWlDPFL.Muscles%2BTime)
+ - [Muscles in Time Data](https://radar.kit.edu/radar/en/dataset/VDPCEFSThBWlDPFL.Muscles%2BTime) (DOI: [10.35097/VDPCEFSThBWlDPFL](https://dx.doi.org/10.35097/VDPCEFSThBWlDPFL))
 
 Note that the data release server zips additional metadata together with the compressed MinT dataset which means you have to extract this outer container first. The actual compressed MinT data can be found within under:
 `10.35097-VDPCEFSThBWlDPFL\10.35097-VDPCEFSThBWlDPFL\data\dataset\MinT.tar.zst`
@@ -359,18 +359,86 @@ In the following we show how data can be loaded **without** using the musint pac
 [182 rows x 402 columns]
 ```
 
-### Project Roadmap
-
-Future releases will include:
-- Public access to the full MinT dataset via a DOI for long-term storage and citation.
-- Additional tools for data augmentation and advanced preprocessing.
-
 
 ### License
 
-The Muscles in Time dataset and the `musint` package are released under the [CC BY-NC 4.0 License](https://creativecommons.org/licenses/by-nc/4.0/). The code for the data generation pipeline is licensed under the [Apache License 2.0](https://apache.org/licenses/LICENSE-2.0).
+Please have a look at the data release server ([RADAR@KIT](https://radar.kit.edu/radar/en/dataset/VDPCEFSThBWlDPFL.Muscles%2BTime)) to find the licences for the Muscles in Time dataset as well as the original motion capture datasets which it builds upon.
 
-### Acknowledgments
+### Bibtex
 
-This work was supported by the Karlsruhe Institute of Technology. The dataset is based on contributions from various publicly available datasets, including AMASS, BMLmovi, and KIT Whole-Body Human Motion Database.
+When using Muscles in Time, plase make sure to cite the following works:
+
+```bibtex
+% MinT
+@inproceedings{mint_schneider2024muscles,
+               title={Muscles in Time: Learning to Understand Human Motion In-Depth by Simulating Muscle Activations},
+               author={Schneider, David and Rei{\ss}, Simon and Kugler, Marco and Jaus, Alexander and Peng, Kunyu and Sutschet, Susanne and Sarfraz, M Saquib and Matthiesen, Sven and Stiefelhagen, Rainer},
+               booktitle={The Thirty-eight Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
+               year={2024}
+              },
+
+% KIT Whole-Body Human Motion Database
+@inproceedings{mint_kit_human_motion_db_1,
+               author = {Christian Mandery and \"Omer Terlemez and Martin Do and Nikolaus Vahrenkamp and Tamim Asfour},
+               title = {The {KIT} Whole-Body Human Motion Database},
+               booktitle = {International Conference on Advanced Robotics (ICAR)},
+               pages = {329--336},
+               year = {2015},
+              }, 
+@article{mint_kit_human_motion_db_2,
+         author = {Christian Mandery and \"Omer Terlemez and Martin Do and Nikolaus Vahrenkamp and Tamim Asfour},
+         title = {Unifying Representations and Large-Scale Whole-Body Motion Databases for Studying Human Motion},
+         pages = {796--809},
+         volume = {32},
+         number = {4},
+         journal = {IEEE Transactions on Robotics},
+         year = {2016},
+        },
+@inproceedings{mint_kit_human_motion_db_3,
+               author = {Franziska Krebs and Andre Meixner and Isabel Patzer and Tamim Asfour},
+               title = {The {KIT} Bimanual Manipulation Dataset},
+               booktitle = {IEEE/RAS International Conference on Humanoid Robots (Humanoids)},
+               pages = {499--506},
+               year = {2021},
+              },
+
+% Total Capture
+@inproceedings{mint_TotalCapture,
+               author = {Trumble, Matt and Gilbert, Andrew and Malleson, Charles and Hilton, Adrian and Collomosse, John},
+               title = {{Total Capture}: 3D Human Pose Estimation Fusing Video and Inertial Sensors},
+               booktitle = {2017 British Machine Vision Conference (BMVC)},
+               year = {2017}
+              },
+
+% Eyes Japan
+@misc{mint_EyesJapanDataset,
+      title = {{Eyes Japan MoCap Dataset}},
+      author = {Eyes JAPAN Co. Ltd.},
+      url = {http://mocapdata.com}
+     },
+
+% BML
+@article{mint_ghorbani2021movi,
+         title={MoVi: A large multi-purpose human motion and video dataset},
+         author={Ghorbani, Saeed and Mahdaviani, Kimia and Thaler, Anne and Kording, Konrad and Cook, Douglas James and Blohm, Gunnar and Troje, Nikolaus F},
+         journal={Plos one},
+         volume={16},
+         number={6},
+         pages={e0253157},
+         year={2021},
+         publisher={Public Library of Science San Francisco, CA USA}
+        },
+
+% AMASS
+@inproceedings{mint_AMASS:2019,
+               title={AMASS: Archive of Motion Capture as Surface Shapes},
+               author={Mahmood, Naureen and Ghorbani, Nima and F. Troje, Nikolaus and Pons-Moll, Gerard and Black, Michael J.},
+               booktitle = {The IEEE International Conference on Computer Vision (ICCV)},
+               year={2019},
+               month = {Oct},
+               url = {https://amass.is.tue.mpg.de},
+               month_numeric = {10}
+              },
+
+```
 
