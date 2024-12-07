@@ -13,7 +13,7 @@ Note that the data release server zips additional metadata together with the com
 
 It requires Zstandard for decompression. Modern versions of `tar` should support it out-of-the-box, for older versions you might have to install `zstd` and pass it to tar via the `-I zstd` option.
 
-We also performed some analysis, checking various metrics to get a better understanding of simulation quality. This data is provided both in human readable (text log file and pdf) and machine readable form (pickle file) as metadata. Please have a look at our website to find the link to that metadata. It is not required to use MinT, unless you want to filter samples based on these quality metrics.
+We also performed some analysis, checking various metrics to get a better understanding of simulation quality. This data is provided both in human readable (text log file and pdf) and machine readable form (pickle file) as metadata. Please have a look at our website to find the link to that metadata. It is not required to use MinT, unless you want to filter samples based on these quality metrics. If you want to understand better how we calculate this metadata, you can have a look at this repository: [Mint Analysis](https://github.com/simplexsigil/mint-analysis)
 
 The MinT dataset offers over 9 hours of simulated muscle activation data, covering 227 subjects and 402 muscle strands. 
 It is built by performing OpenSim simulation on the following motion capture datasets:
