@@ -69,11 +69,11 @@ mint_dataset = MintDataset(dataset_path, use_cache=True)
 
 # Retrieve sample by path
 sample_by_path = mint_dataset.by_path("TotalCapture/TotalCapture/s1/acting2_poses")
-print(sample_by_path)
+print(f"Sample representation:\n", sample_by_path)
 
 # Retrieve sample by path ID
 path_id = mint_dataset.path_ids[0]
-print(f"Path ID: {path_id}")
+print(f"Path ID of sample with index 0: {path_id}")
 
 sample_by_path_id = mint_dataset.by_path_id(path_id)
 
@@ -87,8 +87,8 @@ sample_by_humanml3d_name = mint_dataset.by_humanml3d_name("003260")[0]
 valid_indices = sample_by_humanml3d_name.get_valid_indices((10, 1000), 20.0)
 
 # Get gaps in data
-gaps = mint_dataset.get_gaps(as_frame=True, target_fps=20.0)
-print(gaps)
+gaps = sample_by_humanml3d_name.get_gaps(as_frame=True, target_fps=20.0)
+print(f"Simulation gaps for HM3D sample 003260:", gaps)
 ```
 
 ```python
